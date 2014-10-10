@@ -19,7 +19,7 @@ import com.google.common.base.Preconditions;
 
 public class ClusterLogger {
 
-    private static final String DEFAULT_CONTACT_POINT = "172.31.2.15";
+    private static final String DEFAULT_CONTACT_POINT = "10.211.56.110";
 
     private static final Logger LOG = LoggerFactory.getLogger(ClusterLogger.class);
 
@@ -84,18 +84,17 @@ public class ClusterLogger {
 
 	StringBuilder b = new StringBuilder();
 	b.append("\n\tHost (" + address.getCanonicalHostName() + ") [");
-	b.append("\n\t\tHostAddress:\t" + address.getHostAddress());
-	b.append("\n\t\tHostName:\t" + address.getHostName());
-	b.append("\n\t\tAddress:\t" + address.getAddress());
-	b.append("\n\t\tSocket CanonicalHostName:\t" + sockAddress.getCanonicalHostName());
+	b.append("\n\t\tHostAddress:\t\t" + address.getHostAddress());
+	b.append("\n\t\tHostName:\t\t" + address.getHostName());
+	b.append("\n\t\tSocket Canonical:\t" + sockAddress.getCanonicalHostName());
 	b.append("\n\t\tSocket HostAddress:\t" + sockAddress.getHostAddress());
 	b.append("\n\t\tSocket HostName:\t" + sockAddress.getHostName());
-	b.append("\n\t\tSocket Port:\t" + port);
-	b.append("\n\t\tIs up:\t" + up);
-	b.append("\n\t\tDataCenter:\t" + datacenter);
-	b.append("\n\t\tRack:\t" + rack);
+	b.append("\n\t\tSocket Port:\t\t" + port);
+	b.append("\n\t\tIs up:\t\t\t" + up);
+	b.append("\n\t\tDataCenter:\t\t" + datacenter);
+	b.append("\n\t\tRack:\t\t\t" + rack);
 	b.append("\n\t\tCassandra Version:\t" + v.getMajor() + "." + v.getMinor() + "." + v.getPatch());
-	b.append("\n\t\tDSE Patch:\t" + v.getDSEPatch());
+	b.append("\n\t\tDSE Patch:\t\t" + v.getDSEPatch());
 	b.append("\n\t]");
 
 	return b.toString();
