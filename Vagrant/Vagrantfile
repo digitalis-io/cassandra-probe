@@ -1,0 +1,111 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+env_var_cmd = ""
+if ENV['datastax_repo_username']
+  username = ENV['datastax_repo_username']
+  password = ENV['datastax_repo_password']
+  env_var_cmd = <<CMD
+sudo echo 'export datastax_repo_username=#{username}' >> /etc/profile
+sudo echo 'export datastax_repo_password=#{password}' >> /etc/profile
+CMD
+end
+
+repo_cred_script = <<SCRIPT
+#{env_var_cmd}
+SCRIPT
+
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+boxes = [
+  { :name => 'dse-cass1', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '192.168.183.10', :seeds => '192.168.183.10,192.168.183.12', :dc => 'DC1', :rack => 'rack1', :cpus =>2, :memory => 1024},
+  { :name => 'dse-cass2', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '192.168.183.11', :seeds => '192.168.183.10,192.168.183.12', :dc => 'DC1', :rack => 'rack2', :cpus =>2, :memory => 1024},
+  { :name => 'dse-cass3', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '192.168.183.12', :seeds => '192.168.183.10,192.168.183.12', :dc => 'DC2', :rack => 'rack1', :cpus =>2, :memory => 1024},
+  { :name => 'dse-cass4', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '192.168.183.13', :seeds => '192.168.183.10,192.168.183.12', :dc => 'DC2', :rack => 'rack2', :cpus =>2, :memory => 1024}
+]
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  
+  config.vm.box = "ubuntu/trusty64"
+  
+  config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
+  boxes.each do |val|
+    config.vm.define val[:name] do |config|
+      
+      config.vm.provider :virtualbox do |v|
+        v.customize ["modifyvm", :id, "--memory", val[:memory]]
+        v.customize ["modifyvm", :id, "--cpus", val[:cpus] ]
+        
+      config.vm.provision :shell, :inline => "sudo apt-get update"
+      config.vm.provision :shell, :inline => "sudo apt-get upgrade -y"         
+      
+      config.vm.provision :shell, :inline => repo_cred_script
+      config.vm.provision :shell, :path => "config/repo.sh" 
+      
+      #Install rmate to connect to TextMate on host MacBook for text editing
+      config.vm.provision :shell, :inline => "sudo gem install rmate"
+      config.vm.provision :shell, :inline => "sudo echo 'export RMATE_HOST=192.168.183.1' >> /etc/profile"
+      
+      #Allow root login
+      config.vm.provision :shell, :inline => "sudo sed -i 's/PermitRootLogin.*$/PermitRootLogin yes/' /etc/ssh/sshd_config"
+      config.vm.provision :shell, :inline => "sudo service ssh restart"            
+      
+      config.vm.network :private_network, ip: val[:ip]
+      config.vm.provision :shell, :inline => "cp -fv /vagrant/config/hosts /etc/hosts"
+      config.vm.provision :shell, :inline => "echo '#{val[:name]}' > /etc/hostname"
+      config.vm.provision :shell, :inline => "sudo hostname #{val[:name]}"
+      
+      config.vm.provision :shell, :inline => "sudo apt-get install squid-deb-proxy-client avahi-utils unzip -y"
+      config.vm.provision :shell, :inline => "sudo apt-get install python-software-properties -y"
+      
+      #Install Git
+      config.vm.provision :shell, :inline => "sudo apt-get install git -y"
+      
+      #Install GO Lang
+      config.vm.provision :shell, :inline => "sudo apt-get install golang -y"
+      config.vm.provision :shell, :inline => "sudo echo 'export GOPATH=/usr/share/go/' >> /etc/profile"
+      config.vm.provision :shell, :inline => "sudo echo 'export PATH=$PATH:$GOPATH/bin' >> /etc/profile"
+      
+      #PC Stat
+      config.vm.provision :shell, :inline => "go get github.com/tobert/pcstat"
+      
+      config.vm.provision :shell, :path => "config/misc.sh"    
+      config.vm.provision :shell, :path => "config/java.sh"
+      config.vm.provision :shell, :path => "config/dse.sh"  
+      
+      config.vm.provision :shell, :inline => "sudo echo 'export CQLSH_HOST=#{val[:name]}' >> /etc/profile"            
+      
+      #Confifgure DSE    
+      #Enable vnodes
+      config.vm.provision :shell, :inline => "sed -i 's/initial_token:/#initial_token:/' /etc/dse/cassandra/cassandra.yaml"
+      config.vm.provision :shell, :inline => "sed -i 's/# num_tokens: 256/num_tokens: 256/' /etc/dse/cassandra/cassandra.yaml"
+      
+      #config.vm.provision :shell, :inline => "sed -i 's/initial_token:.*$/initial_token: #{val[:token]}/' /etc/dse/cassandra/cassandra.yaml"
+      config.vm.provision :shell, :inline => "sed -i 's/cluster_name:.*$/cluster_name: dse-cassandra/' /etc/dse/cassandra/cassandra.yaml"
+      config.vm.provision :shell, :inline => "sed -i 's/listen_address:.*$/listen_address: #{val[:ip]}/' /etc/dse/cassandra/cassandra.yaml"
+      config.vm.provision :shell, :inline => "sed -i 's/rpc_address:.*$/rpc_address: #{val[:ip]}/' /etc/dse/cassandra/cassandra.yaml"
+      config.vm.provision :shell, :inline => "sed -i 's/seeds:.*$/seeds: \"#{val[:seeds]}\"/' /etc/dse/cassandra/cassandra.yaml"      
+      config.vm.provision :shell, :inline => "sed -i 's/concurrent_reads:.*$/concurrent_reads: 16/' /etc/dse/cassandra/cassandra.yaml"
+      config.vm.provision :shell, :inline => "sed -i 's/concurrent_writes:.*$/concurrent_reads: 16/' /etc/dse/cassandra/cassandra.yaml"
+      config.vm.provision :shell, :inline => "sed -i 's/rpc_server_type:.*$/rpc_server_type: sync/' /etc/dse/cassandra/cassandra.yaml"
+      config.vm.provision :shell, :inline => "sed -i 's/auto_snapshot:.*$/auto_snapshot: false/' /etc/dse/cassandra/cassandra.yaml"
+      config.vm.provision :shell, :inline => "sed -i 's/internode_compression:.*$/internode_compression: none/' /etc/dse/cassandra/cassandra.yaml"
+      config.vm.provision :shell, :inline => "sed -i 's/delegated_snitch:.*$/delegated_snitch: org.apache.cassandra.locator.GossipingPropertyFileSnitch/' /etc/dse/dse.yaml"
+      config.vm.provision :shell, :inline => "sed -i 's/dc=.*$/dc=#{val[:dc]}/' /etc/dse/cassandra/cassandra-rackdc.properties"
+      config.vm.provision :shell, :inline => "sed -i 's/rack=.*$/rack=#{val[:rack]}/' /etc/dse/cassandra/cassandra-rackdc.properties"
+      
+      #Double check defaulst are not set for extea-DSE features
+      config.vm.provision :shell, :inline => "sed -i 's/HADOOP_ENABLED=.*$/HADOOP_ENABLED=#{val[:hadoop]}/' /etc/default/dse"
+      config.vm.provision :shell, :inline => "sed -i 's/SOLR_ENABLED=.*$/SOLR_ENABLED=#{val[:solr]}/' /etc/default/dse"
+      config.vm.provision :shell, :inline => "sed -i 's/SPARK_ENABLED=.*$/SPARK_ENABLED=#{val[:spark]}/' /etc/default/dse"
+      config.vm.provision :shell, :inline => "sed -i 's/CFS_ENABLED=.*$/CFS_ENABLED=#{val[:cfs]}/' /etc/default/dse"
+        
+      config.vm.provision :shell, :inline => "service dse restart"       
+      
+
+    end
+  end
+end
+
+end
