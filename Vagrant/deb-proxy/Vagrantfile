@@ -1,0 +1,40 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrant Debian Proxy VM
+# Sets up a simple VM with a Squid proxy/cache to speed up local package installs for Debian/Ubuntu
+# Brian Cantoni
+# ref: http://www.garron.me/en/blog/ubuntu-deb-proxy-cache.html
+
+# Adjustable settings
+CFG_MEMSIZE = "512"      # max memory for each VM
+CFG_IP = "10.211.54.100"  # private IP address
+
+node_script = <<SCRIPT
+#!/bin/bash
+
+# install a few base packages
+apt-get update
+apt-get install vim curl python-pip squid-deb-proxy squid-deb-proxy-client -y
+
+SCRIPT
+
+
+# VM configurations
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.define :debcache do |x|
+    x.vm.box = "hashicorp/precise64"
+    x.vm.provider "vmware_fusion" do |v|
+      v.vmx["memsize"]  = CFG_MEMSIZE
+    end
+    x.vm.provider :virtualbox do |v|
+      v.name = "debcache"
+      v.customize ["modifyvm", :id, "--memory", CFG_MEMSIZE]
+    end
+    x.vm.network :private_network, ip: CFG_IP
+    x.vm.hostname = "debcache"
+    x.vm.provision :shell, :inline => node_script
+  end
+end

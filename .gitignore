@@ -6,6 +6,10 @@ target/
 #Vagrant
 Vagrant/boxes/*
 Vagrant/.vagrant
+Vagrant/dse/boxes/*
+Vagrant/dse/.vagrant
+Vagrant/deb-proxy/boxes/*
+Vagrant/deb-proxy/.vagrant
 
  
 # OS Files #

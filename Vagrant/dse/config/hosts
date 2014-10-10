@@ -7,5 +7,8 @@ ff00::0 ip6-mcastprefix
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 
-192.168.183.10  dse-cass1
-192.168.183.11  dse-cass2
+10.211.56.110  dse-cass1
+10.211.56.111  dse-cass2
+10.211.56.112  dse-cass3
+10.211.56.113  dse-cass4
+
