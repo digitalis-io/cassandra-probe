@@ -9,5 +9,3 @@ ff02::2 ip6-allrouters
 
 192.168.183.10  dse-cass1
 192.168.183.11  dse-cass2
-192.168.183.12  dse-cass3
-192.168.183.13  dse-cass3
