@@ -1,4 +1,4 @@
-package com.datastax.probe;
+package com.datastax.probev1;
 
 import org.apache.commons.lang3.time.StopWatch;
 

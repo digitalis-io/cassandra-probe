@@ -1,4 +1,4 @@
-package com.datastax.probe;
+package com.datastax.probev1;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

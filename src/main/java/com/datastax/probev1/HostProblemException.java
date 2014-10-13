@@ -1,4 +1,4 @@
-package com.datastax.probe;
+package com.datastax.probev1;
 
 public class HostProblemException extends RuntimeException {
 
