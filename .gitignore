@@ -11,6 +11,8 @@ Vagrant/dse/boxes/*
 Vagrant/dse/.vagrant
 Vagrant/deb-proxy/boxes/*
 Vagrant/deb-proxy/.vagrant
+Vagrant/statsd-graphite/boxes/*
+Vagrant/statsd-graphite/.vagrant
 
  
 # OS Files #
