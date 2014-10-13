@@ -111,7 +111,7 @@ public class App {
 	    }
 
 	    try {
-		ProbeAction rpcPort = new PortProbe("RPC", h, h.getRpcPort(), TIMEOUT_MS);
+		ProbeAction rpcPort = new PortProbe("Thrift", h, h.getRpcPort(), TIMEOUT_MS);
 		rpcPort.execute();
 	    } catch (Exception e) {
 		LOG.warn(e.getMessage());
@@ -119,7 +119,7 @@ public class App {
 	    }
 	    
 	    try {
-		ProbeAction storagePort = new PortProbe("Storage", h, h.getStoragePort(), TIMEOUT_MS);
+		ProbeAction storagePort = new PortProbe("Gossip", h, h.getStoragePort(), TIMEOUT_MS);
 		storagePort.execute();
 	    } catch (Exception e) {
 		LOG.warn(e.getMessage());

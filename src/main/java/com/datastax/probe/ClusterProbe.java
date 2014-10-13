@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -82,6 +83,8 @@ public class ClusterProbe {
 
     public void discoverCluster() {
 	try {
+	    LOG.info("About to discover cluster '"+this.clusterName+"' details using seed contact points: "+Arrays.toString(this.contactPoints));
+	    
 	    com.datastax.driver.core.Cluster.Builder clusterBulder = com.datastax.driver.core.Cluster.builder()
 		    .addContactPoints(this.contactPoints)
 		    .withClusterName(this.clusterName) //parsed from the yaml
