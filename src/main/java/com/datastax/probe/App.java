@@ -15,7 +15,9 @@ import com.datastax.probe.actions.TelnetProbe;
 import com.datastax.probe.model.HostProbe;
 
 public class App {
-
+    
+    private static final int TIMEOUT_MS = 10000;
+    
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
     private String yamlPath;
     private String user;
@@ -91,31 +93,37 @@ public class App {
 	for (HostProbe h : hosts) {
 	    LOG.info("Probing Host: " + h);
 	    try {
-		ProbeAction isReachable = new IsReachableProbe(h);
+		ProbeAction isReachable = new IsReachableProbe(h, TIMEOUT_MS);
 		isReachable.execute();
 	    } catch (Exception e) {
-		LOG.warn(e.getMessage(), e);
+		LOG.warn(e.getMessage());
+		LOG.debug(e.getMessage(), e);
 	    }
 
 	    try {
-		ProbeAction nativePort = new TelnetProbe(h, h.getNativePort());
+		ProbeAction nativePort = new TelnetProbe("Native", h, h.getNativePort(), TIMEOUT_MS);
 		nativePort.execute();
 	    } catch (Exception e) {
-		LOG.warn(e.getMessage(), e);
+		LOG.warn(e.getMessage());
+		LOG.debug(e.getMessage(), e);
 	    }
 
 	    try {
-		ProbeAction rpcPort = new TelnetProbe(h, h.getRpcPort());
+		ProbeAction rpcPort = new TelnetProbe("RPC", h, h.getRpcPort(), TIMEOUT_MS);
 		rpcPort.execute();
 	    } catch (Exception e) {
-		LOG.warn(e.getMessage(), e);
+		LOG.warn(e.getMessage());
+		LOG.debug(e.getMessage(), e);
 	    }
+	    
 	    try {
-		ProbeAction storagePort = new TelnetProbe(h, h.getStoragePort());
+		ProbeAction storagePort = new TelnetProbe("Storage", h, h.getStoragePort(), TIMEOUT_MS);
 		storagePort.execute();
 	    } catch (Exception e) {
-		LOG.warn(e.getMessage(), e);
+		LOG.warn(e.getMessage());
+		LOG.debug(e.getMessage(), e);
 	    }
+	    
 	}
 
     }

@@ -11,13 +11,14 @@ import com.datastax.probe.model.HostProbe;
 public class IsReachableProbe implements ProbeAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(IsReachableProbe.class);
-    private static final int DEFAULT_TIMEOUT_MS = 2000;
 
     private final HostProbe host;
     private final StopWatch stopWatch;
+    private final int timeOutMs;
 
-    public IsReachableProbe(final HostProbe host) {
+    public IsReachableProbe(final HostProbe host, int timeOutMs) {
 	this.host = host;
+	this.timeOutMs = timeOutMs;
 	this.stopWatch = new StopWatch();
     }
 
@@ -27,9 +28,9 @@ public class IsReachableProbe implements ProbeAction {
 	try {
 	    this.stopWatch.start();
 	    InetAddress byName = InetAddress.getByName(toAddress);
-	    byName.isReachable(DEFAULT_TIMEOUT_MS);
+	    byName.isReachable(this.timeOutMs);
 	    this.stopWatch.stop();
-	    LOG.info("Took "+this.stopWatch.getTime()+"(ms) to reach host: "+toAddress);
+	    LOG.info("Took "+this.stopWatch.getTime()+" (ms) to check host is reachable: "+this.host);
 	} catch (Exception e) {
 	    this.stopWatch.stop();
 	    String msg = "Fatal problem ecountered attempting to reach Cassandra host '" + toAddress + "' :" + e.getMessage();

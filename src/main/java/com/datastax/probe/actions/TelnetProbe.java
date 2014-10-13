@@ -14,10 +14,15 @@ public class TelnetProbe implements ProbeAction {
     private int port;
     private final HostProbe host;
     private final StopWatch stopWatch;
+    private final int timeoutMs;
+    private final String description;
 
-    public TelnetProbe(final HostProbe host, final int port) {
+
+    public TelnetProbe(final String description, final HostProbe host, final int port, final int timeoutMs) {
+	this.description = description;
 	this.host = host;
 	this.port = port;
+	this.timeoutMs = timeoutMs;
 	this.stopWatch = new StopWatch();
     }
 
@@ -29,10 +34,11 @@ public class TelnetProbe implements ProbeAction {
 	TelnetClient telnetClient = new TelnetClient();
 
 	try {
+	    telnetClient.setDefaultTimeout(timeoutMs);
 	    this.stopWatch.start();
 	    telnetClient.connect(host.getToAddress(), this.port);
 	    this.stopWatch.stop();
-	    LOG.info("Took " + this.stopWatch.getTime() + "(ms) to telnet to host '" + toAddress + "' on port '" + this.port);
+	    LOG.info(description+ " - Took " + this.stopWatch.getTime() + " (ms) to telnet to host '" + toAddress + "' on port '" + this.port+" : "+this.host);
 	} catch (Exception e) {
 	    this.stopWatch.stop();
 	    String msg = "Problem ecountered attempting to telnet to Cassandra host '" + toAddress + "' on port '" + this.port + "' :" + e.getMessage();
