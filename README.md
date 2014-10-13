@@ -10,6 +10,10 @@ and the ability to do any probing is extremely restrictive. Additionally, so why
 
 Next steps are to start pushing the response times on each probe to Graphite etc.. 
 
+There a bunch of Vagrant iamages in the repo also if you want to fire up DataStax Enterprise quickly to play around with.
+
+
+
 Getting started
 ---------------
 
