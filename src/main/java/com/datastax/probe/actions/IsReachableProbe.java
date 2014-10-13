@@ -23,19 +23,25 @@ public class IsReachableProbe implements ProbeAction {
     }
 
     @Override
-    public void execute() throws FatalProbeException {
+    public boolean execute() throws FatalProbeException {
 	String toAddress = host.getToAddress();
+	boolean result = false;
 	try {
 	    this.stopWatch.start();
 	    InetAddress byName = InetAddress.getByName(toAddress);
-	    byName.isReachable(this.timeOutMs);
+	    result = byName.isReachable(this.timeOutMs);
 	    this.stopWatch.stop();
-	    LOG.info("Took "+this.stopWatch.getTime()+" (ms) to check host is reachable: "+this.host);
+	    if (result) {
+		LOG.info("Took " + this.stopWatch.getTime() + " (ms) to check host is reachable: " + this.host);
+	    } else {
+		LOG.warn("Could not reach host '"+toAddress+"' after "+this.timeOutMs+" (ms) : "+this.host); 
+	    }
 	} catch (Exception e) {
 	    this.stopWatch.stop();
 	    String msg = "Fatal problem ecountered attempting to reach Cassandra host '" + toAddress + "' :" + e.getMessage();
-	    throw new FatalProbeException(msg, e);
+	    throw new FatalProbeException(msg, e, this.host);
 	}
+	return result;
 
     }
 

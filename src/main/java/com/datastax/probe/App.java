@@ -15,9 +15,9 @@ import com.datastax.probe.actions.PortProbe;
 import com.datastax.probe.model.HostProbe;
 
 public class App {
-    
+
     private static final int TIMEOUT_MS = 10000;
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
     private String yamlPath;
     private String user;
@@ -93,39 +93,46 @@ public class App {
 	cp.discoverCluster();
 	Set<HostProbe> hosts = cp.getHosts();
 	for (HostProbe h : hosts) {
-	    LOG.info("Probing Host: " + h);
+	    LOG.info("Probing Host '" + h.getToAddress() + "' : " + h);
+
+	    boolean hostReachable = false;
 	    try {
 		ProbeAction isReachable = new IsReachableProbe(h, TIMEOUT_MS);
-		isReachable.execute();
+		hostReachable = isReachable.execute();
 	    } catch (Exception e) {
-		LOG.warn(e.getMessage());
+		LOG.warn(e.getMessage(), e);
 		LOG.debug(e.getMessage(), e);
 	    }
 
-	    try {
-		ProbeAction nativePort = new PortProbe("Native", h, h.getNativePort(), TIMEOUT_MS);
-		nativePort.execute();
-	    } catch (Exception e) {
-		LOG.warn(e.getMessage());
-		LOG.debug(e.getMessage(), e);
+	    if (hostReachable) {
+		try {
+		    ProbeAction nativePort = new PortProbe("Native", h, h.getNativePort(), TIMEOUT_MS);
+		    nativePort.execute();
+		} catch (Exception e) {
+		    LOG.warn(e.getMessage(), e);
+		    LOG.debug(e.getMessage(), e);
+		}
+
+		try {
+		    ProbeAction rpcPort = new PortProbe("Thrift", h, h.getRpcPort(), TIMEOUT_MS);
+		    rpcPort.execute();
+		} catch (Exception e) {
+		    LOG.warn(e.getMessage(), e);
+		    LOG.debug(e.getMessage(), e);
+		}
+
+		try {
+		    ProbeAction storagePort = new PortProbe("Gossip", h, h.getStoragePort(), TIMEOUT_MS);
+		    storagePort.execute();
+		} catch (Exception e) {
+		    LOG.warn(e.getMessage(), e);
+		    LOG.debug(e.getMessage(), e);
+		}
+
+	    } else {
+		LOG.warn("Unable to reach host '" + h.getToAddress() + "' completely - Cassandra ports will not be probed");
 	    }
 
-	    try {
-		ProbeAction rpcPort = new PortProbe("Thrift", h, h.getRpcPort(), TIMEOUT_MS);
-		rpcPort.execute();
-	    } catch (Exception e) {
-		LOG.warn(e.getMessage());
-		LOG.debug(e.getMessage(), e);
-	    }
-	    
-	    try {
-		ProbeAction storagePort = new PortProbe("Gossip", h, h.getStoragePort(), TIMEOUT_MS);
-		storagePort.execute();
-	    } catch (Exception e) {
-		LOG.warn(e.getMessage());
-		LOG.debug(e.getMessage(), e);
-	    }
-	    
 	}
 
     }
