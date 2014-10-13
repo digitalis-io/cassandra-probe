@@ -95,7 +95,7 @@ public class ClusterProbe {
 
 	Metadata metadata = this.cassandraCluster.getMetadata();
 	Set<Host> allHosts = metadata.getAllHosts();
-	StringBuilder b = new StringBuilder("Discovered Cluster '" + this.clusterName + "' are :");
+	StringBuilder b = new StringBuilder("\nDiscovered Cassandra Cluster '" + this.clusterName + "' via native driver, details are :");
 	for (Host host : allHosts) {
 	    b.append(this.prettyHost(host));
 	    hostBuilder.add(host);
