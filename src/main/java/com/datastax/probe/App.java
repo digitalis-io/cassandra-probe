@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.datastax.probe.actions.FatalProbeException;
 import com.datastax.probe.actions.IsReachableProbe;
 import com.datastax.probe.actions.ProbeAction;
-import com.datastax.probe.actions.PortProbe;
+import com.datastax.probe.actions.SocketProbe;
 import com.datastax.probe.model.HostProbe;
 
 public class App {
@@ -106,7 +106,7 @@ public class App {
 
 	    if (hostReachable) {
 		try {
-		    ProbeAction nativePort = new PortProbe("Native", h, h.getNativePort(), TIMEOUT_MS);
+		    ProbeAction nativePort = new SocketProbe("Native", h, h.getNativePort(), TIMEOUT_MS);
 		    nativePort.execute();
 		} catch (Exception e) {
 		    LOG.warn(e.getMessage(), e);
@@ -114,7 +114,7 @@ public class App {
 		}
 
 		try {
-		    ProbeAction rpcPort = new PortProbe("Thrift", h, h.getRpcPort(), TIMEOUT_MS);
+		    ProbeAction rpcPort = new SocketProbe("Thrift", h, h.getRpcPort(), TIMEOUT_MS);
 		    rpcPort.execute();
 		} catch (Exception e) {
 		    LOG.warn(e.getMessage(), e);
@@ -122,7 +122,7 @@ public class App {
 		}
 
 		try {
-		    ProbeAction storagePort = new PortProbe("Gossip", h, h.getStoragePort(), TIMEOUT_MS);
+		    ProbeAction storagePort = new SocketProbe("Gossip", h, h.getStoragePort(), TIMEOUT_MS);
 		    storagePort.execute();
 		} catch (Exception e) {
 		    LOG.warn(e.getMessage(), e);
