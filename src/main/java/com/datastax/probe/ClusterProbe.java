@@ -73,7 +73,12 @@ public class ClusterProbe {
     }
 
     private void buildCluster() {
-	this.cassandraCluster = com.datastax.driver.core.Cluster.builder().addContactPoints(this.contactPoints).withClusterName(this.clusterName) //parsed from the yaml
+	this.cassandraCluster = com.datastax.driver.core.Cluster.builder()
+		.addContactPoints(this.contactPoints)
+		.withClusterName(this.clusterName) //parsed from the yaml
+		.withPort(this.nativePort)
+		.withoutJMXReporting()
+		.withoutMetrics()
 		.build();
     }
 
