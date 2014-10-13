@@ -1,7 +1,7 @@
 cassandra-probe
 ===============
 
-This project is just a simple java app that reads the cassandra.yaml file off the local file system, connects up to Cassandra using the seed nodes, discovers all the nodes in the cluster and then attempts to check each host is reachable and if it is attempts to open a Socket on each of the Cassandra ports that should have Cassandra listening on it.
+This project is just a simple java app that reads the cassandra.yaml file off the local file system, connects up to Cassandra using the seed nodes, discovers all the nodes in the cluster and then attempts to check each host is reachable and, if it is, attempts to open a Socket on each of the Cassandra ports that should have Cassandra listening on it.
 
 Each probe logs out the time in ms it takes to complete - this is the main goal. 
 
