@@ -31,8 +31,20 @@
 		<joda-time.version>2.4</joda-time.version>
 		<guava.version>18.0</guava.version>
 		<commons-lang3.version>3.3.2</commons-lang3.version>
+		<commons-net.version>3.3</commons-net.version>
+		<disruptor.version>3.3.0</disruptor.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>com.lmax</groupId>
+			<artifactId>disruptor</artifactId>
+			<version>${disruptor.version}</version>
+		</dependency>	
+		<dependency>
+			<groupId>commons-net</groupId>
+			<artifactId>commons-net</artifactId>
+			<version>${commons-net.version}</version>
+		</dependency>	
 		<dependency>
 			<groupId>com.datastax.cassandra</groupId>
 			<artifactId>cassandra-driver-core</artifactId>
