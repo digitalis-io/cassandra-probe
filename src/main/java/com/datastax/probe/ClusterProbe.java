@@ -22,6 +22,7 @@ import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.VersionNumber;
 import com.datastax.probe.model.HostProbe;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
@@ -32,7 +33,11 @@ public class ClusterProbe {
     private com.datastax.driver.core.Cluster cassandraCluster;
     private ImmutableSet<HostProbe> hosts;
 
-    private File cassandraYaml;
+    private final File cassandraYaml;
+    private final String localHostName;
+    private final String user;
+    private final String password;
+
     @SuppressWarnings("rawtypes")
     private Map allValues;
 
@@ -42,7 +47,10 @@ public class ClusterProbe {
     private Integer rpcPort;
     private String[] contactPoints;
 
-    public ClusterProbe(String cassandraYamlPath) throws IOException {
+    public ClusterProbe(String localHostName, String cassandraYamlPath, String user, String password) throws IOException {
+	this.localHostName = localHostName;
+	this.user = user;
+	this.password = password;
 	Preconditions.checkNotNull(cassandraYamlPath);
 	this.cassandraYaml = new File(cassandraYamlPath);
 	parseCassandraYaml();
@@ -74,22 +82,31 @@ public class ClusterProbe {
 
     public void discoverCluster() {
 	try {
-	    this.cassandraCluster = com.datastax.driver.core.Cluster.builder().addContactPoints(this.contactPoints).withClusterName(this.clusterName) //parsed from the yaml
-		    .withPort(this.nativePort).withoutJMXReporting().withoutMetrics().build();
+	    com.datastax.driver.core.Cluster.Builder clusterBulder = com.datastax.driver.core.Cluster.builder()
+		    .addContactPoints(this.contactPoints)
+		    .withClusterName(this.clusterName) //parsed from the yaml
+		    .withPort(this.nativePort)
+		    .withoutJMXReporting()
+		    .withoutMetrics();
+	    
+	    if (!Strings.isNullOrEmpty(this.user)) {
+		clusterBulder.withCredentials(this.user, this.password);
+	    }
+	    this.cassandraCluster =  clusterBulder.build();
 	    this.cassandraCluster.init();
 
 	    Builder<HostProbe> hostBuilder = ImmutableSet.<HostProbe> builder();
 
 	    Metadata metadata = this.cassandraCluster.getMetadata();
 	    Set<Host> allHosts = metadata.getAllHosts();
-	    StringBuilder b = new StringBuilder("\nDiscovered Cassandra Cluster '" + this.clusterName + "' details via native driver :");
+	    StringBuilder b = new StringBuilder("\nDiscovered Cassandra Cluster '" + this.clusterName + "' details via native driver via host '"+this.localHostName+"' :");
 	    for (Host host : allHosts) {
 		b.append(this.prettyHost(host));
 		InetAddress sockAddress = host.getSocketAddress().getAddress();
 		VersionNumber v = host.getCassandraVersion();
 		String cassandraVersion = v.getMajor() + "." + v.getMinor() + "." + v.getPatch();
 
-		HostProbe hp = new HostProbe(sockAddress.getHostAddress(), this.nativePort, this.storagePort, this.rpcPort, host.getDatacenter(), host.getRack(), cassandraVersion);
+		HostProbe hp = new HostProbe(this.localHostName, sockAddress.getHostAddress(), this.nativePort, this.storagePort, this.rpcPort, host.getDatacenter(), host.getRack(), cassandraVersion);
 		hostBuilder.add(hp);
 	    }
 

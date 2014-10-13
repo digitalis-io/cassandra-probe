@@ -9,7 +9,7 @@ public class TestClusterProbe {
     public void testParseCassandraYaml() {
 	ClusterProbe cp;
 	try {
-	    cp = new ClusterProbe("/apps/github/cassandra-probe/cassandra.yaml");
+	    cp = new ClusterProbe("localhost", "/apps/github/cassandra-probe/cassandra.yaml", null, null);
 
 	    Assert.assertEquals("dse-cass", cp.getClusterName());
 	    Assert.assertEquals(7000, cp.getStoragePort().intValue());

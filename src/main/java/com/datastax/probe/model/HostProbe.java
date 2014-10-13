@@ -2,6 +2,7 @@ package com.datastax.probe.model;
 
 public class HostProbe {
     
+    private final String fromAddress;
     private final String toAddress;
     private final int nativePort;
     private final int storagePort;
@@ -11,7 +12,8 @@ public class HostProbe {
     private final String cassandraVersion;
     
     
-    public HostProbe(final String toAddress, final int nativePort, final int storagePort, final int rpcPort, final String dc, final String rack, final String cassandraVersion) {
+    public HostProbe(final String fromAddress, final String toAddress, final int nativePort, final int storagePort, final int rpcPort, final String dc, final String rack, final String cassandraVersion) {
+	this.fromAddress = fromAddress;
 	this.toAddress = toAddress;
 	this.nativePort = nativePort;
 	this.storagePort = storagePort;
@@ -51,13 +53,13 @@ public class HostProbe {
     }
 
 
-    @Override
-    public String toString() {
-	return "HostProbe [toAddress=" + toAddress + ", nativePort=" + nativePort + ", storagePort=" + storagePort + ", rpcPort=" + rpcPort + ", dc=" + dc + ", rack=" + rack
-		+ ", cassandraVersion=" + cassandraVersion + "]";
+    public String getFromAddress() {
+        return fromAddress;
     }
 
-
-
-
+    @Override
+    public String toString() {
+	return "HostProbe [fromAddress=" + fromAddress + ", toAddress=" + toAddress + ", nativePort=" + nativePort + ", storagePort=" + storagePort + ", rpcPort=" + rpcPort
+		+ ", dc=" + dc + ", rack=" + rack + ", cassandraVersion=" + cassandraVersion + "]";
+    }
 }
