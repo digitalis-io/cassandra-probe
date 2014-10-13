@@ -8,15 +8,15 @@ import org.slf4j.LoggerFactory;
 
 import com.datastax.probe.model.HostProbe;
 
-public class IsReachable implements ProbeAction {
+public class IsReachableProbe implements ProbeAction {
 
-    private static final Logger LOG = LoggerFactory.getLogger(IsReachable.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IsReachableProbe.class);
     private static final int DEFAULT_TIMEOUT_MS = 2000;
 
     private final HostProbe host;
     private final StopWatch stopWatch;
 
-    public IsReachable(final HostProbe host) {
+    public IsReachableProbe(final HostProbe host) {
 	this.host = host;
 	this.stopWatch = new StopWatch();
     }
@@ -31,8 +31,8 @@ public class IsReachable implements ProbeAction {
 	    this.stopWatch.stop();
 	    LOG.info("Took "+this.stopWatch.getTime()+"(ms) to reach host: "+toAddress);
 	} catch (Exception e) {
+	    this.stopWatch.stop();
 	    String msg = "Fatal problem ecountered attempting to reach Cassandra host '" + toAddress + "' :" + e.getMessage();
-	    LOG.error(msg, e);
 	    throw new FatalProbeException(msg, e);
 	}
 

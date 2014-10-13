@@ -7,8 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.datastax.probe.actions.FatalProbeException;
-import com.datastax.probe.actions.IsReachable;
+import com.datastax.probe.actions.IsReachableProbe;
 import com.datastax.probe.actions.ProbeAction;
+import com.datastax.probe.actions.TelnetProbe;
 import com.datastax.probe.model.HostProbe;
 
 public class App {
@@ -59,9 +60,32 @@ public class App {
 	Set<HostProbe> hosts = cp.getHosts();
 	for (HostProbe h : hosts) {
 	    LOG.info("Probing Host: " + h);
-	    ProbeAction isReachable = new IsReachable(h);
-	    isReachable.execute();
-	    
+	    try {
+		ProbeAction isReachable = new IsReachableProbe(h);
+		isReachable.execute();
+	    } catch (Exception e) {
+		LOG.warn(e.getMessage(), e);
+	    }
+
+	    try {
+		ProbeAction nativePort = new TelnetProbe(h, h.getNativePort());
+		nativePort.execute();
+	    } catch (Exception e) {
+		LOG.warn(e.getMessage(), e);
+	    }
+
+	    try {
+		ProbeAction rpcPort = new TelnetProbe(h, h.getRpcPort());
+		rpcPort.execute();
+	    } catch (Exception e) {
+		LOG.warn(e.getMessage(), e);
+	    }
+	    try {
+		ProbeAction storagePort = new TelnetProbe(h, h.getStoragePort());
+		storagePort.execute();
+	    } catch (Exception e) {
+		LOG.warn(e.getMessage(), e);
+	    }
 	}
 
     }
