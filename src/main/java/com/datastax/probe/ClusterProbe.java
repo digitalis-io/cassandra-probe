@@ -20,6 +20,7 @@ import org.yaml.snakeyaml.Yaml;
 import com.datastax.driver.core.Host;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.VersionNumber;
+import com.datastax.probe.model.HostProbe;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
@@ -29,7 +30,7 @@ public class ClusterProbe {
     private static final Logger LOG = LoggerFactory.getLogger(ClusterProbe.class);
 
     private com.datastax.driver.core.Cluster cassandraCluster;
-    private ImmutableSet<Host> hosts;
+    private ImmutableSet<HostProbe> hosts;
 
     private File cassandraYaml;
     @SuppressWarnings("rawtypes")
@@ -45,7 +46,6 @@ public class ClusterProbe {
 	Preconditions.checkNotNull(cassandraYamlPath);
 	this.cassandraYaml = new File(cassandraYamlPath);
 	parseCassandraYaml();
-
     }
 
     @SuppressWarnings("rawtypes")
@@ -72,37 +72,33 @@ public class ClusterProbe {
 	Preconditions.checkNotNull(contactPoints, "seed_provider contact points not found in inputted yaml %s", cassandraYaml.getAbsolutePath());
     }
 
-    private void buildCluster() {
-	this.cassandraCluster = com.datastax.driver.core.Cluster.builder()
-		.addContactPoints(this.contactPoints)
-		.withClusterName(this.clusterName) //parsed from the yaml
-		.withPort(this.nativePort)
-		.withoutJMXReporting()
-		.withoutMetrics()
-		.build();
-    }
+    public void discoverCluster() {
+	try {
+	    this.cassandraCluster = com.datastax.driver.core.Cluster.builder().addContactPoints(this.contactPoints).withClusterName(this.clusterName) //parsed from the yaml
+		    .withPort(this.nativePort).withoutJMXReporting().withoutMetrics().build();
+	    this.cassandraCluster.init();
 
-    public void dumpResults() {
-	// TODO Auto-generated method stub
-	throw new RuntimeException("Implement me!");
-    }
+	    Builder<HostProbe> hostBuilder = ImmutableSet.<HostProbe> builder();
 
-    public void init() {
-	this.buildCluster();
-	Preconditions.checkNotNull(this.cassandraCluster);
+	    Metadata metadata = this.cassandraCluster.getMetadata();
+	    Set<Host> allHosts = metadata.getAllHosts();
+	    StringBuilder b = new StringBuilder("\nDiscovered Cassandra Cluster '" + this.clusterName + "' details via native driver :");
+	    for (Host host : allHosts) {
+		b.append(this.prettyHost(host));
+		InetAddress sockAddress = host.getSocketAddress().getAddress();
+		VersionNumber v = host.getCassandraVersion();
+		String cassandraVersion = v.getMajor() + "." + v.getMinor() + "." + v.getPatch();
 
-	Builder<Host> hostBuilder = ImmutableSet.<Host> builder();
+		HostProbe hp = new HostProbe(sockAddress.getHostAddress(), this.nativePort, this.storagePort, this.rpcPort, host.getDatacenter(), host.getRack(), cassandraVersion);
+		hostBuilder.add(hp);
+	    }
 
-	Metadata metadata = this.cassandraCluster.getMetadata();
-	Set<Host> allHosts = metadata.getAllHosts();
-	StringBuilder b = new StringBuilder("\nDiscovered Cassandra Cluster '" + this.clusterName + "' via native driver, details are :");
-	for (Host host : allHosts) {
-	    b.append(this.prettyHost(host));
-	    hostBuilder.add(host);
+	    LOG.info(b.toString());
+	    this.hosts = hostBuilder.build();
+	} finally {
+	    this.cassandraCluster.close();
+	    this.cassandraCluster = null;
 	}
-
-	LOG.info(b.toString());
-	this.hosts = hostBuilder.build();
     }
 
     /**
@@ -163,7 +159,7 @@ public class ClusterProbe {
 	return b.toString();
     }
 
-    public Set<Host> getHosts() {
+    public Set<HostProbe> getHosts() {
 	return hosts;
     }
 

@@ -21,7 +21,7 @@ public class TestClusterProbe {
 	    Assert.assertTrue(seeds.length == 2);
 	    Assert.assertEquals(seeds, expectedSeeds);
 	    
-	    cp.init();
+	    cp.discoverCluster();
 
 	} catch (Exception e) {
 	    e.printStackTrace(System.err);
