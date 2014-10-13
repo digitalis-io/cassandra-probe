@@ -1,15 +1,12 @@
 cassandra-probe
 ===============
 
-This project is just a simple java app that reads the cassandra.yaml file of the local file system, connects up to Cassandra using the seed nodes, discovers all 
-the nodes in the cluster and then attempts to check each host is reachable and if it is attempts to open a Socket on each of the Cassandra ports that should have
-Cassandra listening on it.
+This project is just a simple java app that reads the cassandra.yaml file off the local file system, connects up to Cassandra using the seed nodes, discovers all the nodes in the cluster and then attempts to check each host is reachable and if it is attempts to open a Socket on each of the Cassandra ports that should have Cassandra listening on it.
 
-Each probe logs out the time in ms it takes to complete - this is the main goal. I keep coming across situations where there is a lack of monitoring on the network
-and the ability to do any probing is extremely restrictive. Additionally, so why did I implement this in Java? Well, there are also a lot of situations where the only
-thing I can run is a java app.
+Each probe logs out the time in ms it takes to complete - this is the main goal. 
 
-Obviously, there is nothing here that couldn't be implemented in bash or whatever tool you prefer.
+I keep coming across situations where there is a lack of monitoring on the network
+and the ability to do any probing is extremely restrictive. Additionally, so why did I implement this in Java? Well, there are also a lot of situations where the only thing I can run is a java app. Obviously, there is nothing here that couldn't be implemented in bash or whatever tool you prefer.
 
 Next steps are to start pushing the response times on each probe to Graphite etc.. 
 
