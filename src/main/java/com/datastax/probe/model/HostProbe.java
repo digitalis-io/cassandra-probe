@@ -11,7 +11,8 @@ public class HostProbe {
     private final String rack;
     private final String cassandraVersion;
     
-    
+    //listen_address=10.211.56.110
+    //rpc_address=10.211.56.110
     public HostProbe(final String fromAddress, final String toAddress, final int nativePort, final int storagePort, final int rpcPort, final String dc, final String rack, final String cassandraVersion) {
 	this.fromAddress = fromAddress;
 	this.toAddress = toAddress;

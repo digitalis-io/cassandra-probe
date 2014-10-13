@@ -64,7 +64,7 @@ public class ClusterProbe {
 	final InputStream stream = new FileInputStream(this.cassandraYaml);
 
 	this.allValues = (Map) new Yaml().load(stream);
-	LOG.info(allValues.toString());
+	LOG.debug(allValues.toString());
 	this.clusterName = (String) allValues.get("cluster_name");
 	Preconditions.checkNotNull(clusterName, "cluster_name not found in inputted yaml '%s'", cassandraYaml.getAbsolutePath());
 
@@ -102,7 +102,7 @@ public class ClusterProbe {
 
 	    Metadata metadata = this.cassandraCluster.getMetadata();
 	    Set<Host> allHosts = metadata.getAllHosts();
-	    StringBuilder b = new StringBuilder("\nDiscovered Cassandra Cluster '" + this.clusterName + "' details via native driver via host '"+this.localHostName+"' :");
+	    StringBuilder b = new StringBuilder("\nDiscovered Cassandra Cluster '" + this.clusterName + "' details via native driver from host '"+this.localHostName+"' :");
 	    for (Host host : allHosts) {
 		b.append(this.prettyHost(host));
 		InetAddress sockAddress = host.getSocketAddress().getAddress();
