@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import com.datastax.probe.model.HostProbe;
 
-public class TelnetProbe implements ProbeAction {
+public class PortProbe implements ProbeAction {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TelnetProbe.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PortProbe.class);
 
     private int port;
     private final HostProbe host;
@@ -18,7 +18,7 @@ public class TelnetProbe implements ProbeAction {
     private final String description;
 
 
-    public TelnetProbe(final String description, final HostProbe host, final int port, final int timeoutMs) {
+    public PortProbe(final String description, final HostProbe host, final int port, final int timeoutMs) {
 	this.description = description;
 	this.host = host;
 	this.port = port;

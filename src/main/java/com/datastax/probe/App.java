@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.datastax.probe.actions.FatalProbeException;
 import com.datastax.probe.actions.IsReachableProbe;
 import com.datastax.probe.actions.ProbeAction;
-import com.datastax.probe.actions.TelnetProbe;
+import com.datastax.probe.actions.PortProbe;
 import com.datastax.probe.model.HostProbe;
 
 public class App {
@@ -35,11 +35,13 @@ public class App {
 	String user = null;
 	String pwd = null;
 	if (args.length > 1) {
-	    LOG.info("Reading cassandra login credentials from environment variables");
+	    LOG.info("Reading cassandra login credentials from environment variables...");
 	    String cassandraUsernameEnv = args[1];
 	    String cassandraPwdEnv = args[2];
 	    user = System.getenv(cassandraUsernameEnv);
 	    pwd = System.getenv(cassandraPwdEnv);
+	} else {
+	    LOG.info("No login credentials required...");
 	}
 
 	App app = new App();
@@ -101,7 +103,7 @@ public class App {
 	    }
 
 	    try {
-		ProbeAction nativePort = new TelnetProbe("Native", h, h.getNativePort(), TIMEOUT_MS);
+		ProbeAction nativePort = new PortProbe("Native", h, h.getNativePort(), TIMEOUT_MS);
 		nativePort.execute();
 	    } catch (Exception e) {
 		LOG.warn(e.getMessage());
@@ -109,7 +111,7 @@ public class App {
 	    }
 
 	    try {
-		ProbeAction rpcPort = new TelnetProbe("RPC", h, h.getRpcPort(), TIMEOUT_MS);
+		ProbeAction rpcPort = new PortProbe("RPC", h, h.getRpcPort(), TIMEOUT_MS);
 		rpcPort.execute();
 	    } catch (Exception e) {
 		LOG.warn(e.getMessage());
@@ -117,7 +119,7 @@ public class App {
 	    }
 	    
 	    try {
-		ProbeAction storagePort = new TelnetProbe("Storage", h, h.getStoragePort(), TIMEOUT_MS);
+		ProbeAction storagePort = new PortProbe("Storage", h, h.getStoragePort(), TIMEOUT_MS);
 		storagePort.execute();
 	    } catch (Exception e) {
 		LOG.warn(e.getMessage());
