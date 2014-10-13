@@ -25,6 +25,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jdk.version>1.7</jdk.version>
+		<snakeyaml.version>1.13</snakeyaml.version>
 		<testng.version>6.8.8</testng.version>
 		<cassandra-driver.version>2.1.0</cassandra-driver.version>
 		<logback.version>1.0.9</logback.version>
@@ -35,6 +36,11 @@
 		<disruptor.version>3.3.0</disruptor.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>${snakeyaml.version}</version>
+		</dependency>	
 		<dependency>
 			<groupId>com.lmax</groupId>
 			<artifactId>disruptor</artifactId>

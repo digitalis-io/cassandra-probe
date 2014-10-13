@@ -1,22 +1,28 @@
 package com.datastax.disruptor;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
 import com.datastax.driver.core.Host;
 import com.datastax.probe.ClusterProbe;
 import com.datastax.probe.model.IsReachable;
+import com.google.common.base.Preconditions;
 
 public class App {
 
     public static void main(String[] args) throws Exception {
-
+	Preconditions.checkNotNull(args);
+	String yamlPath = args[0];
+	Preconditions.checkNotNull(yamlPath);
+	
+	
 	App app = new App();
-	app.multiThreadUpdatesTest();
+	app.multiThreadUpdatesTest(yamlPath);
     }
 
-    public void multiThreadUpdatesTest() throws InterruptedException {
-	ClusterProbe cluster = new ClusterProbe();
+    public void multiThreadUpdatesTest(String yamlPath) throws InterruptedException, IOException {
+	ClusterProbe cluster = new ClusterProbe(yamlPath);
 	IsReachableProcessor processor = new IsReachableProcessor(cluster);
 	processor.init();
 	
