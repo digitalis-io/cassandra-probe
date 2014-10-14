@@ -12,7 +12,7 @@ Additionally - why did I implement this in Java? Well, there are some situations
 
 Next steps are to start pushing the response times on each probe to Graphite etc.. 
 
-There a bunch of Vagrant iamages in the repo also if you want to fire up DataStax Enterprise quickly to play around with.
+There are a bunch of Vagrant iamages in the repo also if you want to fire up DataStax Enterprise quickly to play around with.
 
 
 
