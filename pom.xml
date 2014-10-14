@@ -10,7 +10,6 @@
 	<url>http://maven.apache.org</url>
 	<developers>
 		<developer>
-			<email>jmiller@datastax.com</email>
 			<name>Johnny Miller</name>
 			<url>https://github.com/millerjp</url>
 			<id>millerjp</id>
