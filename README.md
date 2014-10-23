@@ -41,12 +41,12 @@ scp target/cassandra-probe-jar-with-dependencies.jar your_username@someremotehos
 
 Then connect up to the Cassandra server and run the command
 ```
-java -jar /some/remote/directory/cassandra-probe-jar-with-dependencies.jar <path_to_cassandra_yaml> <username_env_variable> <password_env_variable>
+java -jar /some/remote/directory/cassandra-probe-jar-with-dependencies.jar <path_to_cassandra_yaml> <path_to_cqlshrc_file>
 ```
 
 For example:
 ```
-root@dse-cass2:/tmp# java -jar /tmp/cassandra-probe-jar-with-dependencies.jar /etc/dse/cassandra/cassandra.yaml
+root@dse-cass2:/tmp# java -jar /tmp/cassandra-probe-jar-with-dependencies.jar /etc/dse/cassandra/cassandra.yaml /etc/dse/cassandra/cqlshrc.default
 19:02:37.011 [main] INFO  com.datastax.probe.App - No login credentials required...
 19:02:37.103 [main] INFO  com.datastax.probe.ClusterProbe - About to discover cluster 'dse-cass' details using seed contact points: [10.211.56.110, 10.211.56.111]
 19:02:37.109 [main] WARN  c.d.driver.core.FrameCompressor - Cannot find Snappy class, you should make sure the Snappy library is in the classpath if you intend to use it. Snappy compression will not be available for the protocol.
