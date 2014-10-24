@@ -48,7 +48,7 @@ You can have the probe run continuously with an interval between probes passed i
 
 If the Cassandra cluster has authentication enabled you need to pass in the path to the [cqlshrc](http://www.datastax.com/documentation/cql/3.1/cql/cql_reference/cqlsh.html?scroll=refCqlsh__cqlshUsingCqlshrc) file on the local file system - this will contain the security credentials needed to connect.
 
-Alternatively, if you want to run the probe once only and then exit then pass in an in interval < 1.
+If you want to run the probe once only and then exit then pass in an in interval < 1.
 
 For example:
 ```
