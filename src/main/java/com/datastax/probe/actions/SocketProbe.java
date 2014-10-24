@@ -18,7 +18,6 @@ public class SocketProbe implements ProbeAction {
 
     private int port;
     private final HostProbe host;
-    private StopWatch stopWatch;
     private final int timeoutMs;
     private final String description;
 
@@ -27,7 +26,6 @@ public class SocketProbe implements ProbeAction {
 	this.host = host;
 	this.port = port;
 	this.timeoutMs = timeoutMs;
-	this.stopWatch = new StopWatch();
     }
 
     @Override
@@ -37,9 +35,9 @@ public class SocketProbe implements ProbeAction {
 	String toAddress = host.getToAddress();
 	
 	Socket socket = null;
-	this.stopWatch = new StopWatch();
+	StopWatch stopWatch = new StopWatch();
 	try {
-	    this.stopWatch.start();
+	    stopWatch.start();
 	    socket = new Socket();
 	    socket.setReuseAddress(false);
 	    socket.connect(new InetSocketAddress(toAddress, this.port), this.timeoutMs);
@@ -61,7 +59,7 @@ public class SocketProbe implements ProbeAction {
 	    String msg = "Problem ecountered attempting to open Socket to Cassandra host '" + toAddress + "' on port '" + this.port + "' :" + e.getMessage() + " : " + this.host;
 	    throw new FatalProbeException(msg, e, this.host);
 	} finally {
-	    this.stopWatch.stop();
+	    stopWatch.stop();
 	    if (socket != null && socket.isConnected()) {
 		try {
 		    socket.close();
@@ -71,16 +69,11 @@ public class SocketProbe implements ProbeAction {
 		}
 	    }
 	    
-	    LOG.info(description + " - Took " + this.stopWatch.getTime() + " (ms) to open Socket to host '" + toAddress + "' on port '" + this.port + " : " + this.host);
+	    LOG.info(description + " - Took " + stopWatch.getTime() + " (ms) to open Socket to host '" + toAddress + "' on port '" + this.port + " : " + this.host);
 	}
 
 	return result;
 
-    }
-
-    @Override
-    public StopWatch getTime() {
-	return stopWatch;
     }
 
 }

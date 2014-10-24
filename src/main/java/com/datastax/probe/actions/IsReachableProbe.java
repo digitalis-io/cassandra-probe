@@ -13,42 +13,34 @@ public class IsReachableProbe implements ProbeAction {
     private static final Logger LOG = LoggerFactory.getLogger(IsReachableProbe.class);
 
     private final HostProbe host;
-    private StopWatch stopWatch;
     private final int timeOutMs;
 
     public IsReachableProbe(final HostProbe host, int timeOutMs) {
 	this.host = host;
 	this.timeOutMs = timeOutMs;
-	this.stopWatch = new StopWatch();
     }
 
     @Override
     public boolean execute() throws FatalProbeException {
 	String toAddress = host.getToAddress();
 	boolean result = false;
-	this.stopWatch = new StopWatch();
+	StopWatch stopWatch = new StopWatch();
 	try {
-	    this.stopWatch.start();
+	    stopWatch.start();
 	    InetAddress byName = InetAddress.getByName(toAddress);
 	    result = byName.isReachable(this.timeOutMs);
-	    this.stopWatch.stop();
+	    stopWatch.stop();
 	    if (result) {
-		LOG.info("Took " + this.stopWatch.getTime() + " (ms) to check host is reachable: " + this.host);
+		LOG.info("Took " + stopWatch.getTime() + " (ms) to check host is reachable: " + this.host);
 	    } else {
 		LOG.warn("Could not reach host '"+toAddress+"' after "+this.timeOutMs+" (ms) : "+this.host); 
 	    }
 	} catch (Exception e) {
-	    this.stopWatch.stop();
+	    stopWatch.stop();
 	    String msg = "Fatal problem ecountered attempting to reach Cassandra host '" + toAddress + "' :" + e.getMessage();
 	    throw new FatalProbeException(msg, e, this.host);
 	}
 	return result;
 
     }
-
-    @Override
-    public StopWatch getTime() {
-	return this.stopWatch;
-    }
-
 }
