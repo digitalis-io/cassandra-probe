@@ -46,11 +46,13 @@ java -jar /some/remote/directory/cassandra-probe-jar-with-dependencies.jar <inte
 
 You can have the probe run continuously with an interval between probes passed in seconds. Note - overlapping probe jobs will not occur. 
 
+If the Cassandra cluster has authentication enabled you need to pass in the path to the [cqlshrc](http://www.datastax.com/documentation/cql/3.1/cql/cql_reference/cqlsh.html?scroll=refCqlsh__cqlshUsingCqlshrc) file on the local file system - this will contain the security credentials needed to connect.
+
 Alternatively, if you want to run the probe once only and then exit then pass in an in interval < 1.
 
 For example:
 ```
-root@dse-cass2:/tmp# java -jar 5 /tmp/cassandra-probe-jar-with-dependencies.jar /etc/dse/cassandra/cassandra.yaml /etc/dse/cassandra/cqlshrc.default
+root@dse-cass2:/tmp# java -jar 5 /tmp/cassandra-probe-jar-with-dependencies.jar /etc/dse/cassandra/cassandra.yaml
 08:23:34.288 [main] INFO  com.datastax.probe.App - interval provided as '5'
 08:23:34.291 [main] INFO  com.datastax.probe.App - yamlPath provided as '/apps/github/cassandra-probe/cassandra.yaml'
 08:23:34.291 [main] INFO  com.datastax.probe.App - No cqlshrc path provided. Cassandra will be connected to without authentication
