@@ -18,7 +18,7 @@ public class SocketProbe implements ProbeAction {
 
     private int port;
     private final HostProbe host;
-    private final StopWatch stopWatch;
+    private StopWatch stopWatch;
     private final int timeoutMs;
     private final String description;
 
@@ -37,6 +37,7 @@ public class SocketProbe implements ProbeAction {
 	String toAddress = host.getToAddress();
 	
 	Socket socket = null;
+	this.stopWatch = new StopWatch();
 	try {
 	    this.stopWatch.start();
 	    socket = new Socket();

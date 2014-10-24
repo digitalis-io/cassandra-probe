@@ -13,7 +13,7 @@ public class IsReachableProbe implements ProbeAction {
     private static final Logger LOG = LoggerFactory.getLogger(IsReachableProbe.class);
 
     private final HostProbe host;
-    private final StopWatch stopWatch;
+    private StopWatch stopWatch;
     private final int timeOutMs;
 
     public IsReachableProbe(final HostProbe host, int timeOutMs) {
@@ -26,6 +26,7 @@ public class IsReachableProbe implements ProbeAction {
     public boolean execute() throws FatalProbeException {
 	String toAddress = host.getToAddress();
 	boolean result = false;
+	this.stopWatch = new StopWatch();
 	try {
 	    this.stopWatch.start();
 	    InetAddress byName = InetAddress.getByName(toAddress);
