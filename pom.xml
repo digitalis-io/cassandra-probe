@@ -36,8 +36,14 @@
 		<disruptor.version>3.3.0</disruptor.version>
 		<metrics.version>3.1.0</metrics.version>
 		<metrics-graphite.version>3.0.2</metrics-graphite.version>
+		<quartz.version>2.2.1</quartz.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>${quartz.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>
 			<artifactId>metrics-graphite</artifactId>

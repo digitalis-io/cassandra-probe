@@ -1,184 +1,84 @@
 package com.datastax.probe;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Properties;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.datastax.probe.actions.FatalProbeException;
-import com.datastax.probe.actions.IsReachableProbe;
-import com.datastax.probe.actions.ProbeAction;
-import com.datastax.probe.actions.SocketProbe;
-import com.datastax.probe.model.HostProbe;
-import com.google.common.base.Preconditions;
+import com.datastax.probe.job.ProbeJob;
 
 public class App {
 
-    private static final int TIMEOUT_MS = 10000;
-
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
-    private String yamlPath;
-    private String user;
-    private String pwd;
 
     public static void main(String[] args) {
-	if (args == null || args.length < 1) {
-	    String message = "Invalid usage. Path to cassandra.yaml should be passed in as arg[0]. Path to .cqlshrc should be (optionally) passed in as arg[1]";
+	if (args == null || args.length < 2) {
+	    String message = "Invalid usage. Interval in seconds should be passed in as arg[0]. If only required to run once, set interval to < 1 seconds. Path to cassandra.yaml should be passed in as arg[1]. "
+		    + "Path to cqlshrc file should be (optionally) passed in as arg[2]";
 	    LOG.error(message);
 	    System.err.println(message);
 	    System.exit(1);
 	}
 
-	String yamlPath = args[0];
-
-	App app = new App();
-	app.setYamlPath(yamlPath);
-
+	int interval = -1;
+	String yamlPath = null;
 	try {
-	    if (args.length == 2) {
-		String cqlshRc = args[1];
-		LOG.info("CQLSHRC file will be read from '" + cqlshRc + "'");
-		if (StringUtils.isNotEmpty(cqlshRc)) {
-		    LOG.info("Reading cassandra login credentials from CQLSHRC file located at " + cqlshRc);
-		    app.parseCqlshRcFile(cqlshRc);
-		} else {
-		    LOG.info("No CQLSHRC passed in. No login credentials will be used...");
-		}
-	    } else {
-		LOG.info("No CQLSHRC file provided. Cassandra will be connected to without authentication");
-	    }
-
-	    app.probe();
+	    interval = Integer.parseInt(args[0].trim());
+	    LOG.info("interval provided as '" + interval + "'");
+	    yamlPath = args[1].trim();
+	    LOG.info("yamlPath provided as '" + yamlPath + "'");
 	} catch (Exception e) {
-	    String message = "Problem encountered with probing cluster: " + e.getMessage();
-	    System.err.println(message);
+	    String msg = "Problem encountered parsing arguments: " + e.getMessage();
+	    LOG.error(msg, e);
 	    e.printStackTrace(System.err);
-	    LOG.error(message, e);
 	    System.exit(1);
-
 	}
 
-	System.exit(0);
-
-    }
-
-    private void parseCqlshRcFile(String path) throws IOException {
-	Preconditions.checkNotNull(path, "The path to CQLSHRC file can not be null or empty");
-
-	String userName = null;
-	String password = null;
-
-	File cqlshRcFile = new File(path);
-	if (!cqlshRcFile.exists()) {
-	    throw new RuntimeException("The CQLSHRC '" + path + "' file does not exist");
-	}
-
-	if (!cqlshRcFile.canRead()) {
-	    throw new RuntimeException("The CQLSHRC '" + path + "' file can not be read");
-	}
-
-	Properties props = null;
-	try {
-	    props = new Properties();
-	    props.load(new FileInputStream(cqlshRcFile));
-	    userName = (String) props.get("username");
-	    password = (String) props.get("password");
-	} catch (Exception e) {
-	    e.printStackTrace(System.err);
-	    LOG.error("Problem encountered loading property CQLSHRC property file '" + path + "' : " + e.getMessage(), e);
-	    throw new RuntimeException("Problem encountered loading property CQLSHRC property file '" + path + "' : " + e.getMessage(), e);
-	} finally {
-	    if (props != null) {
-		props.clear();
-		props = null;
-	    }
-	}
-
-	if (StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(password)) {
-	    this.setUserDetails(userName, password);
+	String cqlshrcPath = null;
+	if (args.length == 3) {
+	    cqlshrcPath = args[2];
+	    LOG.info("cqlshrc path provided as '" + cqlshrcPath + "'");
 	} else {
-	    throw new RuntimeException("The CQLSHRC '" + path + "' file does not contain user credentials");
+	    LOG.info("No cqlshrc path provided. Cassandra will be connected to without authentication");
+
 	}
 
-    }
-
-    private void setUserDetails(String user, String pwd) {
-	this.user = user;
-	this.pwd = pwd;
-    }
-
-    private String detectLocalHostname() {
-	String hostname = "hostname-could-not-be-detected";
 	try {
-	    hostname = InetAddress.getLocalHost().getHostName();
-	} catch (UnknownHostException e) {
-	    LOG.error("Could not determine local hostname");
-	}
-	return hostname;
-    }
-
-    public String getYamlPath() {
-	return yamlPath;
-    }
-
-    public void setYamlPath(String yamlPath) {
-	this.yamlPath = yamlPath;
-    }
-
-    public void probe() throws FatalProbeException, IOException {
-	ClusterProbe cp = new ClusterProbe(this.detectLocalHostname(), this.getYamlPath(), this.user, this.pwd);
-	cp.discoverCluster();
-	Set<HostProbe> hosts = cp.getHosts();
-	for (HostProbe h : hosts) {
-	    LOG.info("Probing Host '" + h.getToAddress() + "' : " + h);
-
-	    boolean hostReachable = false;
-	    try {
-		ProbeAction isReachable = new IsReachableProbe(h, TIMEOUT_MS);
-		hostReachable = isReachable.execute();
-	    } catch (Exception e) {
-		LOG.warn(e.getMessage(), e);
-		LOG.debug(e.getMessage(), e);
-	    }
-
-	    if (hostReachable) {
-		try {
-		    ProbeAction nativePort = new SocketProbe("Native", h, h.getNativePort(), TIMEOUT_MS);
-		    nativePort.execute();
-		} catch (Exception e) {
-		    LOG.warn(e.getMessage(), e);
-		    LOG.debug(e.getMessage(), e);
-		}
-
-		try {
-		    ProbeAction rpcPort = new SocketProbe("Thrift", h, h.getRpcPort(), TIMEOUT_MS);
-		    rpcPort.execute();
-		} catch (Exception e) {
-		    LOG.warn(e.getMessage(), e);
-		    LOG.debug(e.getMessage(), e);
-		}
-
-		try {
-		    ProbeAction storagePort = new SocketProbe("Gossip", h, h.getStoragePort(), TIMEOUT_MS);
-		    storagePort.execute();
-		} catch (Exception e) {
-		    LOG.warn(e.getMessage(), e);
-		    LOG.debug(e.getMessage(), e);
-		}
-
+	    if (interval < 1) {
+		LOG.info("Running probe once only");
+		final Prober app = (cqlshrcPath != null) ? new Prober(yamlPath, cqlshrcPath) : new Prober(yamlPath);
+		app.probe();
+		System.exit(0);
 	    } else {
-		LOG.warn("Unable to reach host '" + h.getToAddress() + "' completely - Cassandra ports will not be probed");
+		LOG.info("Running probe continuously with an interval of "+interval+" seconds between probes");
+		final App app = new App();
+		app.startJob(interval, yamlPath, cqlshrcPath);
 	    }
-
+	} catch (Exception e) {
+	    String msg = "Problem encountered starting job: " + e.getMessage();
+	    LOG.error(msg, e);
+	    e.printStackTrace(System.err);
+	    System.exit(1);
 	}
+    }
 
+    public void startJob(int intervalInSeconds, String yamlPath, String cqlshrcPath) throws SchedulerException {
+	JobDetail job = JobBuilder.newJob(ProbeJob.class).withIdentity("ProbeJob", "cassandra-probe").usingJobData("yamlPath", yamlPath).usingJobData("cqlshrcPath", cqlshrcPath)
+		.build();
+
+	Trigger trigger = TriggerBuilder.newTrigger().withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(intervalInSeconds).repeatForever()).build();
+
+	SchedulerFactory schFactory = new StdSchedulerFactory();
+	Scheduler sch = schFactory.getScheduler();
+	sch.start();
+	sch.scheduleJob(job, trigger);
     }
 
 }
