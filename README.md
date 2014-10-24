@@ -1,19 +1,17 @@
 cassandra-probe
 ===============
 
-This project is just a simple java app that reads the cassandra.yaml file off the local file system, connects up to Cassandra using the seed nodes, discovers all the nodes in the cluster and then attempts to check each host is reachable and, if it is, attempts to open a Socket on each of the Cassandra ports that should have Cassandra listening on it.
+This project is just a simple java app that reads the [cassandra.yaml](http://www.datastax.com/documentation/cassandra/2.1/cassandra/configuration/configCassandra_yaml_r.html) file off the local file system, connects up to [Cassandra](http://www.datastax.com/documentation/cassandra/2.1/cassandra/gettingStartedCassandraIntro.html) using the seed nodes, discovers all the nodes in the cluster and then attempts to check each host is reachable and, if it is, attempts to open a Socket on each of the Cassandra ports that should have Cassandra listening on it.
 
 Each probe logs out the time in ms it takes to complete - this is the main goal. 
 
-I keep coming across situations where there is a lack of monitoring on the network
-and the ability to do any probing is extremely restrictive.
+I keep coming across situations where there is a lack of monitoring on the network and the ability to do any probing is extremely restrictive.
 
 Additionally - why did I implement this in Java? Well, there are some situations where the only thing I can run is a java app. Obviously, there is nothing here that couldn't be implemented in bash or whatever tool you prefer.
 
 Next steps are to start pushing the response times on each probe to Graphite etc.. 
 
-There are a bunch of Vagrant images in the repo also if you want to fire up DataStax Enterprise quickly to play around with.
-
+There are a bunch of [Vagrant images](Vagrant) in the repo also if you want to fire up [DataStax Enterprise](http://www.datastax.com) quickly to play around with.
 
 
 Getting started
@@ -39,7 +37,7 @@ scp target/cassandra-probe-jar-with-dependencies.jar your_username@someremotehos
 
 ```
 
-Then connect up to the Cassandra server and run the command
+Then connect up to the Cassandra server and run the command. This will probe every node in the cluster from that server
 ```
 java -jar /some/remote/directory/cassandra-probe-jar-with-dependencies.jar <interval_in_seconds_between probes> <path_to_cassandra_yaml> <path_to_cqlshrc_file>
 ```
