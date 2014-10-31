@@ -1,5 +1,7 @@
 package com.datastax.probe;
 
+import java.util.Arrays;
+
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -27,7 +29,7 @@ import com.datastax.probe.job.ProbeJob;
 public class App {
 
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
-    
+
     @SuppressWarnings("static-access")
     private static Options getCLiOption() {
 	Options options = new Options();
@@ -68,49 +70,57 @@ public class App {
     }
 
     public static void main(String[] args) {
-	
-	 CommandLineParser parser = new BasicParser();
-	 
-	 CommandLine cmd = null;
-	 try {
+	if (args.length == 0 || Arrays.asList(args).contains("--help")) {
+	    new HelpFormatter().printHelp("java -jar cassandra-probe-exec.jar", App.getCLiOption());
+	    System.exit(0);
+	}
+
+	CommandLineParser parser = new BasicParser();
+
+	CommandLine cmd = null;
+	try {
 	    cmd = parser.parse(App.getCLiOption(), args);
 	} catch (ParseException e) {
-	    String msg = "Problem encountered parsing command line arguments : "+e.getMessage();
+	    String msg = "Problem encountered parsing command line arguments : " + e.getMessage();
 	    LOG.error(msg);
 	    System.err.println(msg);
-	    new HelpFormatter().printHelp( "java -jar cassandra-probe.jar", App.getCLiOption() );
+	    new HelpFormatter().printHelp("java -jar cassandra-probe-exec.jar", App.getCLiOption());
 	    System.exit(1);
 	}
-	 
-	 
-	int interval = Integer.parseInt(cmd.getOptionValue("interval", "-1"));
-	LOG.info("interval: "+interval);
-	String yaml = cmd.getOptionValue("yaml");
-	LOG.info("yaml: "+yaml);
-	String cqlshrc = cmd.getOptionValue("cqlshrc");
 
-	if (StringUtils.isNotBlank(cqlshrc)) {
-	    LOG.info("cqlshrc path provided as '" + cqlshrc + "'");
+	if (cmd.hasOption("help")) {
+	    new HelpFormatter().printHelp("java -jar cassandra-probe-exec.jar", App.getCLiOption());
+	    System.exit(0);
 	} else {
-	    LOG.info("No cqlshrc path provided. Cassandra will be connected to without authentication");
-	}
+	    int interval = Integer.parseInt(cmd.getOptionValue("interval", "-1"));
+	    LOG.info("interval: " + interval);
+	    String yaml = cmd.getOptionValue("yaml");
+	    LOG.info("yaml: " + yaml);
+	    String cqlshrc = cmd.getOptionValue("cqlshrc");
 
-	try {
-	    if (interval < 1) {
-		LOG.info("Running probe once only");
-		final Prober app = (cqlshrc != null) ? new Prober(yaml, cqlshrc) : new Prober(yaml);
-		app.probe();
-		System.exit(0);
+	    if (StringUtils.isNotBlank(cqlshrc)) {
+		LOG.info("cqlshrc path provided as '" + cqlshrc + "'");
 	    } else {
-		LOG.info("Running probe continuously with an interval of "+interval+" seconds between probes");
-		final App app = new App();
-		app.startJob(interval, yaml, cqlshrc);
+		LOG.info("No cqlshrc path provided. Cassandra will be connected to without authentication");
 	    }
-	} catch (Exception e) {
-	    String msg = "Problem encountered starting job: " + e.getMessage();
-	    LOG.error(msg, e);
-	    e.printStackTrace(System.err);
-	    System.exit(1);
+
+	    try {
+		if (interval < 1) {
+		    LOG.info("Running probe once only");
+		    final Prober app = (cqlshrc != null) ? new Prober(yaml, cqlshrc) : new Prober(yaml);
+		    app.probe();
+		    System.exit(0);
+		} else {
+		    LOG.info("Running probe continuously with an interval of " + interval + " seconds between probes");
+		    final App app = new App();
+		    app.startJob(interval, yaml, cqlshrc);
+		}
+	    } catch (Exception e) {
+		String msg = "Problem encountered starting job: " + e.getMessage();
+		LOG.error(msg, e);
+		e.printStackTrace(System.err);
+		System.exit(1);
+	    }
 	}
     }
 
