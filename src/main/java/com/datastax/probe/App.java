@@ -6,6 +6,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
@@ -53,7 +54,14 @@ public class App {
 		.withType(String.class)
 		.withDescription("OPTIONAL: The path to the CQLSHRC file containing security user credentials to connect to Cassandra")
 		.create();
-	options.addOption(cqlshRc);
+	
+	
+	OptionGroup security = new OptionGroup();
+	security.addOption(cqlshRc);
+	security.setRequired(false);
+
+	
+	options.addOptionGroup(security);
 	
 	
 	return options;

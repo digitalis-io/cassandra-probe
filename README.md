@@ -31,17 +31,30 @@ mvn clean compile assembly:single
 
 ```
 
-You will now have an executable jar with all the dependencies in there. It is located in `target/cassandra-probe-jar-with-dependencies.jar` !
+You will now have an executable jar (with all the dependencies included) located at `target/cassandra-probe-exec.jar` !
+
+Usage:
+```
+usage: java -jar cassandra-probe-exec.jar
+    --cqlshrc <string>   OPTIONAL: The path to the CQLSHRC file containing
+                         security user credentials to connect to Cassandra
+    --interval <int>     OPTIONAL: Interval in seconds between probe jobs.
+                         Overlapping probe jobs will not occur. If not
+                         specified the probe will only run once and then
+                         exit
+    --yaml <string>      The path to the cassandra.yaml file
+```
+
 
 Copy this jar on to your Cassandra server e.g:
 ```
-scp target/cassandra-probe-jar-with-dependencies.jar your_username@someremotehost:/some/remote/directory
+scp target/cassandra-probe-exec.jar your_username@someremotehost:/some/remote/directory
 
 ```
 
 Then connect up to the Cassandra server and run the command. This will probe every node in the cluster from that server
 ```
-java -jar /some/remote/directory/cassandra-probe-jar-with-dependencies.jar <interval_in_seconds_between probes> <path_to_cassandra_yaml> <path_to_cqlshrc_file>
+java -jar cassandra-probe-exec.jar --interval <interval_in_seconds_between probes> --yaml <path_to_cassandra_yaml> --cqlshrc <path_to_cqlshrc_file>
 ```
 
 You can have the probe run continuously with an interval between probes passed in seconds. Note - overlapping probe jobs will not occur. 
@@ -52,7 +65,7 @@ If you want to run the probe once only and then exit then pass in an in interval
 
 For example:
 ```
-root@dse-cass2:/tmp# java -jar 5 /tmp/cassandra-probe-jar-with-dependencies.jar /etc/dse/cassandra/cassandra.yaml
+root@dse-cass2:/tmp# java -jar /tmp/cassandra-probe-exec.jar --interval 5 --yaml /etc/dse/cassandra/cassandra.yaml
 08:23:34.288 [main] INFO  com.datastax.probe.App - interval provided as '5'
 08:23:34.291 [main] INFO  com.datastax.probe.App - yamlPath provided as '/apps/github/cassandra-probe/cassandra.yaml'
 08:23:34.291 [main] INFO  com.datastax.probe.App - No cqlshrc path provided. Cassandra will be connected to without authentication

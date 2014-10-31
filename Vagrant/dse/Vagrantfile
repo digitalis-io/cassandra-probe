@@ -20,15 +20,15 @@ SCRIPT
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
-#boxes = [
-#  { :name => 'dse-cass1', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '10.211.56.110', :seeds => '10.211.56.110,10.211.56.111', :dc => 'DC1', :rack => 'rack1', :cpus =>2, :memory => 2048 },
-#  { :name => 'dse-cass2', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '10.211.56.111', :seeds => '10.211.56.110,10.211.56.111', :dc => 'DC2', :rack => 'rack1', :cpus =>2, :memory => 2048 },
-#  { :name => 'dse-cass3', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '10.211.56.112', :seeds => '10.211.56.110,10.211.56.111', :dc => 'DC1', :rack => 'rack2', :cpus =>2, :memory => 2048 },
-#  { :name => 'dse-cass4', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '10.211.56.113', :seeds => '10.211.56.110,10.211.56.111', :dc => 'DC2', :rack => 'rack3', :cpus =>2, :memory => 2048 }
-#]
 boxes = [
-  { :name => 'dse-cass1', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '10.211.56.110', :seeds => '10.211.56.110,10.211.56.111', :dc => 'DC1', :rack => 'rack1', :cpus =>2, :memory => 2048 }
+  { :name => 'dse-cass1', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '10.211.56.110', :seeds => '10.211.56.110,10.211.56.111', :dc => 'DC1', :rack => 'rack1', :cpus =>2, :memory => 2048 },
+  { :name => 'dse-cass2', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '10.211.56.111', :seeds => '10.211.56.110,10.211.56.111', :dc => 'DC2', :rack => 'rack1', :cpus =>2, :memory => 2048 },
+  { :name => 'dse-cass3', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '10.211.56.112', :seeds => '10.211.56.110,10.211.56.111', :dc => 'DC1', :rack => 'rack2', :cpus =>2, :memory => 2048 },
+  { :name => 'dse-cass4', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '10.211.56.113', :seeds => '10.211.56.110,10.211.56.111', :dc => 'DC2', :rack => 'rack3', :cpus =>2, :memory => 2048 }
 ]
+#boxes = [
+#  { :name => 'dse-cass1', :hadoop => '0', :solr => '0', :spark => '0', :cfs => '0', :ip => '10.211.56.110', :seeds => '10.211.56.110,10.211.56.111', :dc => 'DC1', :rack => 'rack1', :cpus =>2, :memory => 2048 }
+#]
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   config.vm.box = "ubuntu/trusty64"
