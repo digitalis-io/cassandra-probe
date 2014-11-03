@@ -151,7 +151,7 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    
 	    if (this.tracingEnabled) {
 		try {
-		    Thread.sleep(10000); //sleep a bit to allow tracing info to propagate
+		    Thread.sleep(1000); //sleep a bit to allow tracing info to propagate
 		} catch (InterruptedException e) {
 		}
 		logExecutionInfo("Query trace for '" + this.cqlQuery + "'", rs.getExecutionInfo());

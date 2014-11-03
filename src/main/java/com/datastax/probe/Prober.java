@@ -139,6 +139,8 @@ public class Prober {
     }
 
     public void probe() throws FatalProbeException, IOException {
+	LOG.info("\n\nNew Probe Commencing....");
+	
 	ClusterProbe cp = new ClusterProbe(this.detectLocalHostname(), this.getYamlPath(), this.user, this.pwd);
 	cp.discoverCluster(true);
 	Set<HostProbe> hosts = cp.getHosts();
