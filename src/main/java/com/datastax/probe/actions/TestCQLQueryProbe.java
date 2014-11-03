@@ -1,13 +1,13 @@
 package com.datastax.probe.actions;
 
 import java.net.InetSocketAddress;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +33,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
 public class TestCQLQueryProbe implements ProbeAction {
+    
+    private SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSS");
+    
     private static final Logger LOG = LoggerFactory.getLogger(TestCQLQueryProbe.class);
     private static final ImmutableSet<String> PERMITTED_CQL_ACTIONS = ImmutableSet.of("select", "insert", "update");
 
@@ -48,9 +51,9 @@ public class TestCQLQueryProbe implements ProbeAction {
 
     public TestCQLQueryProbe(Cluster cluster, Session session, ConsistencyLevel consistency, String cqlQuery, boolean tracingEnabled) {
 	Preconditions.checkNotNull(cluster);
-	Preconditions.checkArgument(cluster.isClosed(), "Cluster must not be closed");
+	Preconditions.checkArgument(!cluster.isClosed(), "Cluster must not be closed");
 	Preconditions.checkNotNull(session);
-	Preconditions.checkArgument(session.isClosed(), "Session must not be closed");
+	Preconditions.checkArgument(!session.isClosed(), "Session must not be closed");
 	Preconditions.checkNotNull(consistency);
 	Preconditions.checkNotNull(cqlQuery);
 
@@ -61,7 +64,7 @@ public class TestCQLQueryProbe implements ProbeAction {
 	this.cqlQuery = cqlQuery;
 
 	if (!validateCql(cqlQuery)) {
-	    String msg = "Fatal error. Test CQL statement '" + cqlQuery + "' is not permitted. Only statements of types " + PERMITTED_CQL_ACTIONS.toArray().toString()
+	    String msg = "Fatal error. Test CQL statement '" + cqlQuery + "' is not permitted. Only statements of types " + PERMITTED_CQL_ACTIONS
 		    + " are permitted. Exiting program.";
 	    System.err.println(msg);
 	    LOG.error(msg);
@@ -80,28 +83,31 @@ public class TestCQLQueryProbe implements ProbeAction {
 
     public void logExecutionInfo(String prefix, ExecutionInfo executionInfo) {
 	if (executionInfo != null) {
-	    StringBuilder msg = new StringBuilder(prefix);
+	    StringBuilder msg = new StringBuilder("\n"+prefix);
 	    msg.append(String.format("\nHost (queried): %s\n", executionInfo.getQueriedHost().toString()));
 
 	    for (Host host : executionInfo.getTriedHosts()) {
 		msg.append(String.format("Host (tried): %s\n", host.toString()));
 	    }
-
+	    
 	    QueryTrace queryTrace = executionInfo.getQueryTrace();
-	    msg.append(String.format("Trace id: %s\n\n", queryTrace.getTraceId()));
-	    msg.append(String.format("%-38s | %-12s | %-10s | %-12s\n", "activity", "timestamp", "source", "source_elapsed"));
-	    msg.append(String.format("---------------------------------------+--------------+------------+--------------"));
-	    for (QueryTrace.Event event : queryTrace.getEvents()) {
-		msg.append(String.format("%38s | %12s | %10s | %12s\n", event.getDescription(), new DateTime(event.getTimestamp()), event.getSource(),
-			event.getSourceElapsedMicros()));
+	    if (queryTrace != null) {
+		msg.append(String.format("Trace id: %s\n\n", queryTrace.getTraceId()));
+		msg.append(String.format("%-50s | %-12s | %-10s | %-12s\n", "activity", "timestamp", "source", "source_elapsed"));
+		msg.append(String.format("---------------------------------------+--------------+------------+--------------\n"));
+		for (QueryTrace.Event event : queryTrace.getEvents()) {
+		    msg.append(String.format("%38s | %12s | %10s | %12s\n", event.getDescription(), format.format(event.getTimestamp()), event.getSource(),
+			    event.getSourceElapsedMicros()));
+		}
+		LOG.info(msg.toString());
+	    } else {
+		LOG.warn("Query Trace is null\n"+msg);
 	    }
-	    LOG.info(msg.toString());
 	} else {
 	    LOG.warn("Null execution info");
 	}
     }
-    
-    
+
     public void logCluster(Cluster cluster) {
 	try {
 	    if (cluster != null && !cluster.isClosed()) {
@@ -125,32 +131,30 @@ public class TestCQLQueryProbe implements ProbeAction {
     public boolean execute() throws FatalProbeException {
 	boolean result = false;
 	StopWatch stopWatch = new StopWatch();
-	ResultSet rs = null;
 	try {
-	    LOG.info("About to execute synchronous CQL statement '" + this.cqlQuery + "' against Cassandra with query tracing set to " + this.tracingEnabled);
-	    stopWatch.start();
+	    LOG.info("About to execute synchronous CQL statement '" + this.cqlQuery + "' against Cassandra with consistency '"+this.consistency+"' and query tracing set to " + this.tracingEnabled);
 
 	    SimpleStatement stmt = new SimpleStatement(this.cqlQuery);
 	    stmt.setConsistencyLevel(this.consistency);
 	    if (this.tracingEnabled) {
-		LOG.warn("Query tracing has been enabled. Please note that this will increase query response time and persist the query trace into the Cassandra system tables.");
+		LOG.warn("Query tracing has been enabled. Please note that this will increase query response time and will persist the query trace into the Cassandra system tables.");
 		stmt.enableTracing();
 	    } else {
 		stmt.disableTracing();
 	    }
 
-	    rs = this.session.execute(this.cqlQuery);
+	    stopWatch.start();
+	    ResultSet rs = this.session.execute(stmt);
 	    stopWatch.stop();
 	    result = true;
 	    LOG.info("Took " + stopWatch.getTime() + " (ms) to execute test query against Cassandra cluster with query tracing set to " + this.tracingEnabled);
-
+	    
 	    if (this.tracingEnabled) {
 		try {
-		    Thread.sleep(10000); //sleep to allow tracing info
+		    Thread.sleep(10000); //sleep a bit to allow tracing info to propagate
 		} catch (InterruptedException e) {
 		}
-		logCluster(this.cluster);
-		logExecutionInfo("Execution Info for '" + this.cqlQuery + "'", rs.getExecutionInfo());
+		logExecutionInfo("Query trace for '" + this.cqlQuery + "'", rs.getExecutionInfo());
 	    }
 
 	} catch (UnauthorizedException e) {
@@ -208,7 +212,8 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    int requiredReplicas = e.getRequiredReplicas();
 	    ConsistencyLevel cl = e.getConsistencyLevel();
 	    e.printStackTrace(System.err);
-	    String msg = aliveReplicas + " replicas are alive. " + requiredReplicas + " are requried. There is not enough replicas alive to achieve the requested consistency level of '" + cl + "' : " + e.getMessage();
+	    String msg = aliveReplicas + " replicas are alive. " + requiredReplicas
+		    + " are requried. There is not enough replicas alive to achieve the requested consistency level of '" + cl + "' : " + e.getMessage();
 	    System.err.println(msg);
 	    LOG.error(msg);
 
@@ -243,5 +248,12 @@ public class TestCQLQueryProbe implements ProbeAction {
 	}
 
 	return result;
+    }
+
+    public void closeSession() {
+	if (this.session != null && !this.session.isClosed()) {
+	    this.session.close();
+	    this.session = null;
+	}
     }
 }

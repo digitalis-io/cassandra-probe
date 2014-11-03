@@ -11,6 +11,7 @@ import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.probe.Prober;
 
 @DisallowConcurrentExecution
@@ -33,7 +34,10 @@ public class ProbeJob implements Job {
 	boolean thriftProbe = dataMap.getBoolean("thriftProbe");
 	boolean storageProbe = dataMap.getBoolean("storageProbe");
 	boolean pingProbe = dataMap.getBoolean("pingProbe");
-
+	
+	String testCql = dataMap.getString("testCql");
+	ConsistencyLevel consistency = (ConsistencyLevel) dataMap.get("consistency");
+	boolean tracingEnabled = dataMap.getBoolean("tracingEnabled");
 
 
 	LOG.info("Instance " + key + " of ProbeJob yamlPath: " + yamlPath + ", and cqlshrcPath is: " + cqlshrcPath);
@@ -42,11 +46,11 @@ public class ProbeJob implements Job {
 	    stopWatch.start();
 	    Prober app = null;
 	    if (StringUtils.isNotBlank(cqlshrcPath)) {
-		app = new Prober(yamlPath, cqlshrcPath, nativeProbe, thriftProbe, storageProbe, pingProbe);
+		app = new Prober(yamlPath, cqlshrcPath, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 	    } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
-		app = new Prober(yamlPath, username, password, nativeProbe, thriftProbe, storageProbe, pingProbe);
+		app = new Prober(yamlPath, username, password, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 	    } else {
-		app = new Prober(yamlPath, nativeProbe, thriftProbe, storageProbe, pingProbe);
+		app = new Prober(yamlPath, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 	    }
 	    app.probe();
 	} catch (Exception e) {

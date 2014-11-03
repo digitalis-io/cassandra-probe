@@ -115,8 +115,7 @@ public class ClusterProbe {
 	    this.hosts = hostBuilder.build();
 	} finally {
 	    if (!keepAlive) {
-		this.cassandraCluster.close();
-		this.cassandraCluster = null;
+		this.shutDownCluster();
 	    }
 	}
     }
@@ -203,4 +202,16 @@ public class ClusterProbe {
     public Map getAllValues() {
 	return allValues;
     }
+
+    public com.datastax.driver.core.Cluster getCassandraCluster() {
+	return this.cassandraCluster;
+    }
+
+    public void shutDownCluster() {
+	if (this.cassandraCluster != null) {
+	    this.cassandraCluster.close();
+	    this.cassandraCluster = null;
+	}
+    }
+
 }

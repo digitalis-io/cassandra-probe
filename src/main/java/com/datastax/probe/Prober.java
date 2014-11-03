@@ -12,10 +12,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.probe.actions.FatalProbeException;
 import com.datastax.probe.actions.IsReachableProbe;
 import com.datastax.probe.actions.ProbeAction;
 import com.datastax.probe.actions.SocketProbe;
+import com.datastax.probe.actions.TestCQLQueryProbe;
 import com.datastax.probe.model.HostProbe;
 import com.google.common.base.Preconditions;
 
@@ -35,7 +38,13 @@ public class Prober {
     private boolean storageProbe = false;
     private boolean pingProbe = false;
 
-    public Prober(String yamlPath, String cqlshrcPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe) {
+    private String testCql;
+    private ConsistencyLevel consistency;
+
+    private boolean tracingEnabled;
+
+    public Prober(String yamlPath, String cqlshrcPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe, String testCql,
+	    ConsistencyLevel consistency,  boolean tracingEnabled) {
 	Preconditions.checkNotNull(yamlPath, "yaml path must be provided");
 	this.nativeProbe = nativeProbe;
 	this.thriftProbe = thriftProbe;
@@ -49,18 +58,21 @@ public class Prober {
 	    LOG.info("No CQLSHRC file provided. Cassandra will be connected to without authentication");
 	    this.cqlshrcPath = null;
 	}
-
+	this.testCql = testCql;
+	this.consistency = consistency;
+	this.tracingEnabled = tracingEnabled;
     }
 
-    public Prober(String yamlPath, String userName, String password, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe) {
-	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe, pingProbe);
+    public Prober(String yamlPath, String userName, String password, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe, String testCql,
+	    ConsistencyLevel consistency, boolean tracingEnabled) {
+	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 	Preconditions.checkNotNull(userName, "username must be provided");
 	Preconditions.checkNotNull(password, "password must be provided");
 	this.setUserDetails(userName, password);
     }
 
-    public Prober(String yamlPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe) {
-	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe, pingProbe);
+    public Prober(String yamlPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe, String testCql, ConsistencyLevel consistency, boolean tracingEnabled) {
+	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
     }
 
     public void parseCqlshRcFile() {
@@ -128,7 +140,7 @@ public class Prober {
 
     public void probe() throws FatalProbeException, IOException {
 	ClusterProbe cp = new ClusterProbe(this.detectLocalHostname(), this.getYamlPath(), this.user, this.pwd);
-	cp.discoverCluster(false);
+	cp.discoverCluster(true);
 	Set<HostProbe> hosts = cp.getHosts();
 	for (HostProbe h : hosts) {
 	    LOG.info("Probing Host '" + h.getToAddress() + "' : " + h);
@@ -188,6 +200,24 @@ public class Prober {
 		LOG.warn("Unable to reach host '" + h.getToAddress() + "' completely - Cassandra ports will not be probed");
 	    }
 
+	}
+
+	if (StringUtils.isNotBlank(this.testCql) && this.consistency != null) {
+	    TestCQLQueryProbe cqlProbe = null;
+	    try {
+		Cluster cluster = cp.getCassandraCluster();
+		LOG.info("Cluster: "+cluster.isClosed());
+		
+		cqlProbe = new TestCQLQueryProbe(cluster, this.consistency, null, this.testCql, this.tracingEnabled);
+		cqlProbe.execute();
+	    } finally {
+		if (cqlProbe != null) {
+		    cqlProbe.closeSession();
+		}
+		if (cp != null) {
+		    cp.shutDownCluster();
+		}
+	    }
 	}
 
     }

@@ -23,6 +23,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.probe.job.ProbeJob;
 
 public class App {
@@ -46,11 +47,20 @@ public class App {
 		.withDescription(
 			"The path to the CQLSHRC containing security credentails for Cassandra.\nIf this is specified the security credentials will be read from this file and NOT the username/password arguments")
 		.hasArg().withArgName("CQLSHRC").create("c"));
-	options.addOption(OptionBuilder.withLongOpt("ping").withDescription("Execute ping/isReachable probe to Cassandra host").create("p"));
-	options.addOption(OptionBuilder.withLongOpt("storage").withDescription("Probe the storage/gossip port").create("s"));
-	options.addOption(OptionBuilder.withLongOpt("native").withDescription("Probe the native port").create("n"));
-	options.addOption(OptionBuilder.withLongOpt("thrift").withDescription("Probe the thrift port").create("t"));
+	options.addOption(OptionBuilder.withLongOpt("ping").withDescription("Execute ping/isReachable probe to Cassandra host").create("pi"));
+	options.addOption(OptionBuilder.withLongOpt("storage").withDescription("Probe the storage/gossip port").create("st"));
+	options.addOption(OptionBuilder.withLongOpt("native").withDescription("Probe the native port").create("na"));
+	options.addOption(OptionBuilder.withLongOpt("thrift").withDescription("Probe the thrift port").create("th"));
+	
+	options.addOption(OptionBuilder.withLongOpt("test_cql")
+		.withDescription("Test CQL query to run against cluster").hasArg().withArgName("TEST CQL QUERY")
+		.create("cql"));
+	options.addOption(OptionBuilder.withLongOpt("consistency")
+		.withDescription("The consistency level to execute the test CQL").hasArg().withArgName("CONSISTENCY LEVEL")
+		.create("con"));
+	options.addOption(OptionBuilder.withLongOpt("tracing").withDescription("Probe the thrift port").create("tr"));
 
+	
 	return options;
     }
 
@@ -117,24 +127,53 @@ public class App {
 	} else {
 	    LOG.info("No cqlshrc path or user credentials provided. Cassandra will be connected to without any authentication");
 	}
+	
+	String testCql = cmd.getOptionValue("test_cql");
+	String con = cmd.getOptionValue("consistency");
+	boolean tracingEnabled = cmd.hasOption("tracing");
 
+	ConsistencyLevel consistency = null;
+	LOG.debug("Test CQL query '"+testCql+"' and consistency level of '"+con+"'");
+
+	if (StringUtils.isNotBlank(testCql)) {
+	    if (StringUtils.isBlank(con)) {
+		String msg = "Consistency level must be specified if test cql query is provided";
+		LOG.error(msg);
+		System.err.println(msg);
+		App.printHelp();
+		System.exit(1);
+	    }
+	    LOG.info("Test CQL query '"+testCql+"' will be executed at Consistency level of '"+con+"' with tracing enabled "+tracingEnabled);
+	    consistency = ConsistencyLevel.valueOf(con.toUpperCase().trim());
+	    if (consistency == null) {
+		String msg = "Unable to recognise inputted consistency '"+con+"'";
+		LOG.error(msg);
+		System.err.println(msg);
+		App.printHelp();
+		System.exit(1);
+	    }
+	} else {
+	    LOG.info("No Test CQL query required");
+	}
+	
+	
 	try {
 	    if (interval < 1) {
 		LOG.info("Running probe once only");
 		Prober app = null;
 		if (cqlshrc != null) {
-		    app = new Prober(yaml, cqlshrc, nativeProbe, thriftProbe, storageProbe, pingProbe);
+		    app = new Prober(yaml, cqlshrc, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 		} else if (userName != null) {
-		    app = new Prober(yaml, userName, password, nativeProbe, thriftProbe, storageProbe, pingProbe);
+		    app = new Prober(yaml, userName, password, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 		} else {
-		    app = new Prober(yaml, nativeProbe, thriftProbe, storageProbe, pingProbe);
+		    app = new Prober(yaml, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 		}
 		app.probe();
 		System.exit(0);
 	    } else {
 		LOG.info("Running probe continuously with an interval of " + interval + " seconds between probes");
 		final App app = new App();
-		app.startJob(interval, yaml, cqlshrc, userName, password, nativeProbe, thriftProbe, storageProbe, pingProbe);
+		app.startJob(interval, yaml, cqlshrc, userName, password, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 	    }
 	} catch (Exception e) {
 	    String msg = "Problem encountered starting job: " + e.getMessage();
@@ -145,7 +184,8 @@ public class App {
     }
 
     public void startJob(final int intervalInSeconds, final String yamlPath, final String cqlshrcPath, final String userName, final String password, 
-	    final boolean nativeProbe, final boolean thriftProbe, final boolean storageProbe, final boolean pingProbe) throws SchedulerException {
+	    final boolean nativeProbe, final boolean thriftProbe, final boolean storageProbe, final boolean pingProbe, final String testCql,
+	    final ConsistencyLevel consistency,  final boolean tracingEnabled) throws SchedulerException {
 	final JobDataMap args = new JobDataMap();
 	args.put("cqlshrcPath", cqlshrcPath);
 	args.put("yamlPath", yamlPath);
@@ -155,7 +195,9 @@ public class App {
 	args.put("thriftProbe", thriftProbe);
 	args.put("storageProbe", storageProbe);
 	args.put("pingProbe", pingProbe);
-
+	args.put("testCql", testCql);
+	args.put("consistency", consistency);
+	args.put("tracingEnabled", tracingEnabled);	
 
 	JobDetail job = JobBuilder.newJob(ProbeJob.class).withIdentity("ProbeJob", "cassandra-probe").usingJobData(args).build();
 
