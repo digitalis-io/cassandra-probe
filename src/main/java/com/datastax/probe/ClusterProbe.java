@@ -101,7 +101,7 @@ public class ClusterProbe {
 	    Set<Host> allHosts = metadata.getAllHosts();
 	    StringBuilder b = new StringBuilder("\nDiscovered Cassandra Cluster '" + this.clusterName + "' details via native driver from host '" + this.localHostName + "' :");
 	    for (Host host : allHosts) {
-		b.append(this.prettyHost(host));
+		b.append(ClusterProbe.prettyHost(host));
 		InetAddress sockAddress = host.getSocketAddress().getAddress();
 		VersionNumber v = host.getCassandraVersion();
 		String cassandraVersion = v.getMajor() + "." + v.getMinor() + "." + v.getPatch();
@@ -151,7 +151,7 @@ public class ClusterProbe {
 	return null;
     }
 
-    public String prettyHost(final Host host) {
+    public static String prettyHost(final Host host) {
 	Preconditions.checkNotNull(host);
 
 	InetAddress address = host.getAddress();
