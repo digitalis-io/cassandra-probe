@@ -30,8 +30,15 @@ public class Prober {
     private String user;
     private String pwd;
 
-    public Prober(String yamlPath, String cqlshrcPath) {
+    private boolean nativeProbe = false;
+    private boolean thriftProbe = false;
+    private boolean storageProbe = false;
+
+    public Prober(String yamlPath, String cqlshrcPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe) {
 	Preconditions.checkNotNull(yamlPath, "yaml path must be provided");
+	this.nativeProbe = nativeProbe;
+	this.thriftProbe = thriftProbe;
+	this.storageProbe = storageProbe;
 	this.yamlPath = yamlPath;
 	if (StringUtils.isNotBlank(cqlshrcPath)) {
 	    this.cqlshrcPath = cqlshrcPath;
@@ -42,43 +49,16 @@ public class Prober {
 	}
 
     }
-    
-    public Prober(String yamlPath, String userName, String password) {
-	Preconditions.checkNotNull(yamlPath, "yaml path must be provided");
+
+    public Prober(String yamlPath, String userName, String password, boolean nativeProbe, boolean thriftProbe, boolean storageProbe) {
+	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe);
 	Preconditions.checkNotNull(userName, "username must be provided");
 	Preconditions.checkNotNull(password, "password must be provided");
-	
-	this.yamlPath  = yamlPath;
 	this.setUserDetails(userName, password);
-    }   
-
-    public Prober(String yamlPath) {
-	this(yamlPath, null);
     }
 
-    public static void main(String[] args) {
-	if (args == null || args.length < 1) {
-	    String message = "Invalid usage. Path to cassandra.yaml should be passed in as arg[0]. Path to cqlshrc file should be (optionally) passed in as arg[1]";
-	    LOG.error(message);
-	    System.err.println(message);
-	    System.exit(1);
-	}
-
-
-	try {
-	    final Prober app = (args.length == 2) ? new Prober(args[0], args[1]) : new Prober(args[0]);
-	    app.probe();
-	} catch (Exception e) {
-	    String message = "Problem encountered with probing cluster: " + e.getMessage();
-	    System.err.println(message);
-	    e.printStackTrace(System.err);
-	    LOG.error(message, e);
-	    System.exit(1);
-
-	}
-
-	System.exit(0);
-
+    public Prober(String yamlPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe) {
+	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe);
     }
 
     public void parseCqlshRcFile() {
@@ -118,7 +98,8 @@ public class Prober {
 	if (StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(password)) {
 	    this.setUserDetails(userName, password);
 	} else {
-	    throw new RuntimeException("The CQLSHRC '" + this.cqlshrcPath + "' file does not contain any user credentials. Expected property values for keys 'username' and 'password'");
+	    throw new RuntimeException("The CQLSHRC '" + this.cqlshrcPath
+		    + "' file does not contain any user credentials. Expected property values for keys 'username' and 'password'");
 	}
 
     }
@@ -160,28 +141,40 @@ public class Prober {
 	    }
 
 	    if (hostReachable) {
-		try {
-		    ProbeAction nativePort = new SocketProbe("Native", h, h.getNativePort(), TIMEOUT_MS);
-		    nativePort.execute();
-		} catch (Exception e) {
-		    LOG.warn(e.getMessage(), e);
-		    LOG.debug(e.getMessage(), e);
+		if (this.nativeProbe) {
+		    try {
+			ProbeAction nativePort = new SocketProbe("Native", h, h.getNativePort(), TIMEOUT_MS);
+			nativePort.execute();
+		    } catch (Exception e) {
+			LOG.warn(e.getMessage(), e);
+			LOG.debug(e.getMessage(), e);
+		    }
+		} else {
+		    LOG.info("Native probe disabled");
 		}
 
-		try {
-		    ProbeAction rpcPort = new SocketProbe("Thrift", h, h.getRpcPort(), TIMEOUT_MS);
-		    rpcPort.execute();
-		} catch (Exception e) {
-		    LOG.warn(e.getMessage(), e);
-		    LOG.debug(e.getMessage(), e);
+		if (this.thriftProbe) {
+		    try {
+			ProbeAction rpcPort = new SocketProbe("Thrift", h, h.getRpcPort(), TIMEOUT_MS);
+			rpcPort.execute();
+		    } catch (Exception e) {
+			LOG.warn(e.getMessage(), e);
+			LOG.debug(e.getMessage(), e);
+		    }
+		} else {
+		    LOG.info("Thrift probe disabled");
 		}
 
-		try {
-		    ProbeAction storagePort = new SocketProbe("Gossip", h, h.getStoragePort(), TIMEOUT_MS);
-		    storagePort.execute();
-		} catch (Exception e) {
-		    LOG.warn(e.getMessage(), e);
-		    LOG.debug(e.getMessage(), e);
+		if (this.storageProbe) {
+		    try {
+			ProbeAction storagePort = new SocketProbe("Gossip", h, h.getStoragePort(), TIMEOUT_MS);
+			storagePort.execute();
+		    } catch (Exception e) {
+			LOG.warn(e.getMessage(), e);
+			LOG.debug(e.getMessage(), e);
+		    }
+		} else {
+		    LOG.info("Storage/Gossip probe disabled");
 		}
 
 	    } else {

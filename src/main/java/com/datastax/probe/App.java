@@ -46,6 +46,9 @@ public class App {
 		.withDescription(
 			"The path to the CQLSHRC containing security credentails for Cassandra.\nIf this is specified the security credentials will be read from this file and NOT the username/password arguments")
 		.hasArg().withArgName("CQLSHRC").create("c"));
+	options.addOption(OptionBuilder.withLongOpt("storage").withDescription("Probe the storage/gossip port").create("s"));
+	options.addOption(OptionBuilder.withLongOpt("native").withDescription("Probe the native port").create("n"));
+	options.addOption(OptionBuilder.withLongOpt("thrift").withDescription("Probe the thrift port").create("t"));
 
 	return options;
     }
@@ -83,6 +86,17 @@ public class App {
 
 	String userName = cmd.getOptionValue("username");
 	String password = cmd.getOptionValue("password");
+
+	boolean storageProbe = true;
+	boolean thriftProbe = true;
+	boolean nativeProbe = true;
+
+	if (cmd.hasOption("storage") || cmd.hasOption("thrift") || cmd.hasOption("native")) {
+	    storageProbe = cmd.hasOption("storage");
+	    thriftProbe = cmd.hasOption("thrift");
+	    nativeProbe = cmd.hasOption("native");
+	}
+
 	if (StringUtils.isNotBlank(cqlshrc)) {
 	    LOG.info("cqlshrc path provided as '" + cqlshrc + "'");
 	    userName = null;
@@ -106,18 +120,18 @@ public class App {
 		LOG.info("Running probe once only");
 		Prober app = null;
 		if (cqlshrc != null) {
-		    app =  new Prober(yaml, cqlshrc);
+		    app = new Prober(yaml, cqlshrc, nativeProbe, thriftProbe, storageProbe);
 		} else if (userName != null) {
-		    app = new Prober(yaml, userName, password);
+		    app = new Prober(yaml, userName, password, nativeProbe, thriftProbe, storageProbe);
 		} else {
-		    app = new Prober(yaml);
+		    app = new Prober(yaml, nativeProbe, thriftProbe, storageProbe);
 		}
 		app.probe();
 		System.exit(0);
 	    } else {
 		LOG.info("Running probe continuously with an interval of " + interval + " seconds between probes");
 		final App app = new App();
-		app.startJob(interval, yaml, cqlshrc, userName, password);
+		app.startJob(interval, yaml, cqlshrc, userName, password, nativeProbe, thriftProbe, storageProbe);
 	    }
 	} catch (Exception e) {
 	    String msg = "Problem encountered starting job: " + e.getMessage();
@@ -127,13 +141,17 @@ public class App {
 	}
     }
 
-    public void startJob(int intervalInSeconds, String yamlPath, String cqlshrcPath, String userName, String password) throws SchedulerException {
+    public void startJob(final int intervalInSeconds, final String yamlPath, final String cqlshrcPath, final String userName, final String password, 
+	    final boolean nativeProbe, final boolean thriftProbe, final boolean storageProbe) throws SchedulerException {
 	final JobDataMap args = new JobDataMap();
 	args.put("cqlshrcPath", cqlshrcPath);
 	args.put("yamlPath", yamlPath);
 	args.put("username", userName);
 	args.put("password", password);
-	
+	args.put("nativeProbe", nativeProbe);
+	args.put("thriftProbe", thriftProbe);
+	args.put("storageProbe", storageProbe);
+
 	JobDetail job = JobBuilder.newJob(ProbeJob.class).withIdentity("ProbeJob", "cassandra-probe").usingJobData(args).build();
 
 	Trigger trigger = TriggerBuilder.newTrigger().withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(intervalInSeconds).repeatForever()).build();
