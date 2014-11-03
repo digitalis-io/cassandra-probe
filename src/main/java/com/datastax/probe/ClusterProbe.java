@@ -171,6 +171,7 @@ public class ClusterProbe {
 	b.append("\n\t\tSocket Port:\t\t" + port);
 	b.append("\n\t\tDataCenter:\t\t" + datacenter);
 	b.append("\n\t\tRack:\t\t\t" + rack);
+	b.append("\n\t\tIs Up:\t\t\t" + host.isUp());
 	b.append("\n\t\tCassandra Version:\t" + v.getMajor() + "." + v.getMinor() + "." + v.getPatch());
 	b.append("\n\t\tDSE Patch:\t\t" + v.getDSEPatch());
 	b.append("\n\t]");

@@ -93,10 +93,10 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    QueryTrace queryTrace = executionInfo.getQueryTrace();
 	    if (queryTrace != null) {
 		msg.append(String.format("Trace id: %s\n\n", queryTrace.getTraceId()));
-		msg.append(String.format("%-50s | %-12s | %-10s | %-12s\n", "activity", "timestamp", "source", "source_elapsed"));
-		msg.append(String.format("---------------------------------------+--------------+------------+--------------\n"));
+		msg.append(String.format("%-80s | %-12s | %-20s | %-12s\n", "activity", "timestamp", "source", "source_elapsed"));
+		msg.append(String.format("---------------------------------------------------------------------------------+--------------+----------------------+--------------\n"));
 		for (QueryTrace.Event event : queryTrace.getEvents()) {
-		    msg.append(String.format("%38s | %12s | %10s | %12s\n", event.getDescription(), format.format(event.getTimestamp()), event.getSource(),
+		    msg.append(String.format("%80s | %12s | %20s | %12s\n", event.getDescription(), format.format(event.getTimestamp()), event.getSource(),
 			    event.getSourceElapsedMicros()));
 		}
 		LOG.info(msg.toString());
