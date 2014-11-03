@@ -18,8 +18,8 @@
 ; Sample ~/.cqlshrc file.
 
 [authentication]
-; username = fred
-; password = !!bang!!$
+username = cassandra
+password = cassandra
 
 [ui]
 color = on

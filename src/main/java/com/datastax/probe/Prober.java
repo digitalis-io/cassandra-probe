@@ -25,7 +25,7 @@ public class Prober {
 
     private static final Logger LOG = LoggerFactory.getLogger(Prober.class);
     private final String yamlPath;
-    private final String cqlshrcPath;
+    private String cqlshrcPath;
 
     private String user;
     private String pwd;
@@ -42,6 +42,15 @@ public class Prober {
 	}
 
     }
+    
+    public Prober(String yamlPath, String userName, String password) {
+	Preconditions.checkNotNull(yamlPath, "yaml path must be provided");
+	Preconditions.checkNotNull(userName, "username must be provided");
+	Preconditions.checkNotNull(password, "password must be provided");
+	
+	this.yamlPath  = yamlPath;
+	this.setUserDetails(userName, password);
+    }   
 
     public Prober(String yamlPath) {
 	this(yamlPath, null);
@@ -115,6 +124,7 @@ public class Prober {
     }
 
     private void setUserDetails(String user, String pwd) {
+	LOG.info("Username and password provided. Cassandra connection will be authenticated");
 	this.user = user;
 	this.pwd = pwd;
     }
