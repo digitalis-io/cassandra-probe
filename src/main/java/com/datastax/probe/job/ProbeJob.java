@@ -13,28 +13,36 @@ import org.slf4j.LoggerFactory;
 
 import com.datastax.probe.Prober;
 
-
 @DisallowConcurrentExecution
 public class ProbeJob implements Job {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(ProbeJob.class);
-    
+
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
 	LOG.info("ProbeJob running...");
 	StopWatch stopWatch = new StopWatch();
-	
+
 	JobKey key = context.getJobDetail().getKey();
 	JobDataMap dataMap = context.getJobDetail().getJobDataMap();
-	
+
 	String yamlPath = dataMap.getString("yamlPath");
 	String cqlshrcPath = dataMap.getString("cqlshrcPath");
-	
+	String username = dataMap.getString("username");
+	String password = dataMap.getString("password");
+
 	LOG.info("Instance " + key + " of ProbeJob yamlPath: " + yamlPath + ", and cqlshrcPath is: " + cqlshrcPath);
-	
+
 	try {
 	    stopWatch.start();
-	    final Prober app = (StringUtils.isNotBlank(cqlshrcPath)) ? new Prober(yamlPath, cqlshrcPath) : new Prober(yamlPath);
+	    Prober app = null;
+	    if (StringUtils.isNotBlank(cqlshrcPath)) {
+		app = new Prober(yamlPath, cqlshrcPath);
+	    } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
+		app = new Prober(yamlPath, username, password);
+	    } else {
+		app = new Prober(yamlPath);
+	    }
 	    app.probe();
 	} catch (Exception e) {
 	    String message = "Problem encountered with probing cluster: " + e.getMessage();
@@ -44,10 +52,8 @@ public class ProbeJob implements Job {
 	    throw new RuntimeException(message, e);
 	} finally {
 	    stopWatch.stop();
-	    LOG.info("ProbeJob ran - took "+stopWatch.getTime()+" ms to run complete job");
 	}
 
     }
-
 
 }

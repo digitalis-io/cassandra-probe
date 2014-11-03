@@ -11,6 +11,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -116,7 +117,7 @@ public class App {
 	    } else {
 		LOG.info("Running probe continuously with an interval of " + interval + " seconds between probes");
 		final App app = new App();
-		app.startJob(interval, yaml, cqlshrc);
+		app.startJob(interval, yaml, cqlshrc, userName, password);
 	    }
 	} catch (Exception e) {
 	    String msg = "Problem encountered starting job: " + e.getMessage();
@@ -126,9 +127,14 @@ public class App {
 	}
     }
 
-    public void startJob(int intervalInSeconds, String yamlPath, String cqlshrcPath) throws SchedulerException {
-	JobDetail job = JobBuilder.newJob(ProbeJob.class).withIdentity("ProbeJob", "cassandra-probe").usingJobData("yamlPath", yamlPath).usingJobData("cqlshrcPath", cqlshrcPath)
-		.build();
+    public void startJob(int intervalInSeconds, String yamlPath, String cqlshrcPath, String userName, String password) throws SchedulerException {
+	final JobDataMap args = new JobDataMap();
+	args.put("cqlshrcPath", cqlshrcPath);
+	args.put("yamlPath", yamlPath);
+	args.put("username", userName);
+	args.put("password", password);
+	
+	JobDetail job = JobBuilder.newJob(ProbeJob.class).withIdentity("ProbeJob", "cassandra-probe").usingJobData(args).build();
 
 	Trigger trigger = TriggerBuilder.newTrigger().withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(intervalInSeconds).repeatForever()).build();
 
