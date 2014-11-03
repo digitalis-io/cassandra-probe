@@ -128,7 +128,7 @@ public class Prober {
 
     public void probe() throws FatalProbeException, IOException {
 	ClusterProbe cp = new ClusterProbe(this.detectLocalHostname(), this.getYamlPath(), this.user, this.pwd);
-	cp.discoverCluster();
+	cp.discoverCluster(false);
 	Set<HostProbe> hosts = cp.getHosts();
 	for (HostProbe h : hosts) {
 	    LOG.info("Probing Host '" + h.getToAddress() + "' : " + h);

@@ -81,43 +81,43 @@ public class ClusterProbe {
 	Preconditions.checkNotNull(contactPoints, "seed_provider contact points not found in inputted yaml %s", cassandraYaml.getAbsolutePath());
     }
 
-    public void discoverCluster() {
+    public void discoverCluster(boolean keepAlive) {
 	try {
-	    LOG.info("About to discover cluster '"+this.clusterName+"' details using seed contact points: "+Arrays.toString(this.contactPoints));
-	    
-	    com.datastax.driver.core.Cluster.Builder clusterBulder = com.datastax.driver.core.Cluster.builder()
-		    .addContactPoints(this.contactPoints)
+	    LOG.info("About to discover cluster '" + this.clusterName + "' details using seed contact points: " + Arrays.toString(this.contactPoints));
+
+	    com.datastax.driver.core.Cluster.Builder clusterBulder = com.datastax.driver.core.Cluster.builder().addContactPoints(this.contactPoints)
 		    .withClusterName(this.clusterName) //parsed from the yaml
-		    .withPort(this.nativePort)
-		    .withoutJMXReporting()
-		    .withoutMetrics();
-	    
+		    .withPort(this.nativePort).withoutJMXReporting().withoutMetrics();
+
 	    if (!Strings.isNullOrEmpty(this.user)) {
 		clusterBulder.withCredentials(this.user, this.password);
 	    }
-	    this.cassandraCluster =  clusterBulder.build();
+	    this.cassandraCluster = clusterBulder.build();
 	    this.cassandraCluster.init();
 
 	    Builder<HostProbe> hostBuilder = ImmutableSet.<HostProbe> builder();
 
 	    Metadata metadata = this.cassandraCluster.getMetadata();
 	    Set<Host> allHosts = metadata.getAllHosts();
-	    StringBuilder b = new StringBuilder("\nDiscovered Cassandra Cluster '" + this.clusterName + "' details via native driver from host '"+this.localHostName+"' :");
+	    StringBuilder b = new StringBuilder("\nDiscovered Cassandra Cluster '" + this.clusterName + "' details via native driver from host '" + this.localHostName + "' :");
 	    for (Host host : allHosts) {
 		b.append(this.prettyHost(host));
 		InetAddress sockAddress = host.getSocketAddress().getAddress();
 		VersionNumber v = host.getCassandraVersion();
 		String cassandraVersion = v.getMajor() + "." + v.getMinor() + "." + v.getPatch();
 
-		HostProbe hp = new HostProbe(this.localHostName, sockAddress.getHostAddress(), this.nativePort, this.storagePort, this.rpcPort, host.getDatacenter(), host.getRack(), cassandraVersion);
+		HostProbe hp = new HostProbe(this.localHostName, sockAddress.getHostAddress(), this.nativePort, this.storagePort, this.rpcPort, host.getDatacenter(),
+			host.getRack(), cassandraVersion);
 		hostBuilder.add(hp);
 	    }
 
 	    LOG.info(b.toString());
 	    this.hosts = hostBuilder.build();
 	} finally {
-	    this.cassandraCluster.close();
-	    this.cassandraCluster = null;
+	    if (!keepAlive) {
+		this.cassandraCluster.close();
+		this.cassandraCluster = null;
+	    }
 	}
     }
 

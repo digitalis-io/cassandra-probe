@@ -34,6 +34,7 @@ public class TestCQLQueryProbe implements ProbeAction {
     private static final Logger LOG = LoggerFactory.getLogger(TestCQLQueryProbe.class);
     private static final ImmutableSet<String> PERMITTED_CQL_ACTIONS = ImmutableSet.of("select", "insert", "update");
 
+    @SuppressWarnings("unused")
     private Cluster cluster;
     private Session session;
     private ConsistencyLevel consistency;
@@ -115,11 +116,12 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    
 	    ResultSet execute = this.session.execute(this.cqlQuery);
 	    stopWatch.stop();
+	    result = true;
 	    LOG.info("Took " + stopWatch.getTime() + " (ms) to execute test query against Cassandra cluster with query tracing set to "+this.tracingEnabled);
 	    
 	    if (this.tracingEnabled) {
 		try {
-		    Thread.sleep(10000);
+		    Thread.sleep(10000); //sleep to allow tracing info
 		} catch (InterruptedException e) {
 		}
 		
@@ -129,7 +131,7 @@ public class TestCQLQueryProbe implements ProbeAction {
 			logExecutionInfo("Execution Info for '" + this.cqlQuery + "'", ei);
 		    }
 		} else {
-		    LOG.info("No Execution info found");
+		    LOG.warn("No Execution info found");
 		}
 	    }
 	    
@@ -163,9 +165,8 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    System.exit(1);
 	    
 	} catch (NoHostAvailableException e) {
-	    String msg = "Unable to establish a connection to any Cassandra node: "+e.getMessage();
 	    Map<InetSocketAddress, Throwable> errors = e.getErrors();
-	    StringBuilder errorMesages = new StringBuilder(msg);
+	    StringBuilder errorMesages = new StringBuilder("Unable to establish a client connection to any Cassandra node: "+e.getMessage()+". Tried: ");
 	    if (errors != null && errors.size() > 0) {
 		for (InetSocketAddress address : errors.keySet()) {
 		    Throwable throwable = errors.get(address);
@@ -176,9 +177,7 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    }
 	    e.printStackTrace(System.err);
 	    System.err.println(errorMesages.toString());
-	    LOG.warn(errorMesages.toString());
-	    
-	    result = false;
+	    LOG.error(errorMesages.toString());
 	    
 	} catch (UnavailableException e) {
 	    int aliveReplicas = e.getAliveReplicas();
@@ -187,9 +186,7 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    e.printStackTrace(System.err);
 	    String msg = aliveReplicas+" replicas are alive. "+requiredReplicas+" are requried. There is not enough replicas alive to achieve the requested consistency level of '"+cl+"' : "+e.getMessage();
 	    System.err.println(msg);
-	    LOG.warn(msg);
-	    
-	    result = false;
+	    LOG.error(msg);
 	    
 	} catch (ReadTimeoutException e) {
 	    int receivedAcknowledgements = e.getReceivedAcknowledgements();
@@ -200,8 +197,6 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    System.err.println(msg);
 	    LOG.warn(msg);
 	    
-	    result = false;
-
 	} catch (WriteTimeoutException e) {
 	    int receivedAcknowledgements = e.getReceivedAcknowledgements();
 	    int requiredAcknowledgements = e.getRequiredAcknowledgements();
@@ -211,7 +206,11 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    System.err.println(msg);
 	    LOG.warn(msg);
 	    
-	    result = false;
+	} catch (Throwable t) {
+	    t.printStackTrace(System.err);
+	    String msg = "Unexpected error encountered: "+t.getMessage();
+	    System.err.println(msg);
+	    LOG.warn(msg);
 	}
 	
 	return result;
