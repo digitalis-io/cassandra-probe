@@ -33,12 +33,14 @@ public class Prober {
     private boolean nativeProbe = false;
     private boolean thriftProbe = false;
     private boolean storageProbe = false;
+    private boolean pingProbe = false;
 
-    public Prober(String yamlPath, String cqlshrcPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe) {
+    public Prober(String yamlPath, String cqlshrcPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe) {
 	Preconditions.checkNotNull(yamlPath, "yaml path must be provided");
 	this.nativeProbe = nativeProbe;
 	this.thriftProbe = thriftProbe;
 	this.storageProbe = storageProbe;
+	this.pingProbe = pingProbe;
 	this.yamlPath = yamlPath;
 	if (StringUtils.isNotBlank(cqlshrcPath)) {
 	    this.cqlshrcPath = cqlshrcPath;
@@ -50,15 +52,15 @@ public class Prober {
 
     }
 
-    public Prober(String yamlPath, String userName, String password, boolean nativeProbe, boolean thriftProbe, boolean storageProbe) {
-	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe);
+    public Prober(String yamlPath, String userName, String password, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe) {
+	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe, pingProbe);
 	Preconditions.checkNotNull(userName, "username must be provided");
 	Preconditions.checkNotNull(password, "password must be provided");
 	this.setUserDetails(userName, password);
     }
 
-    public Prober(String yamlPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe) {
-	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe);
+    public Prober(String yamlPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe) {
+	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe, pingProbe);
     }
 
     public void parseCqlshRcFile() {
@@ -132,12 +134,17 @@ public class Prober {
 	    LOG.info("Probing Host '" + h.getToAddress() + "' : " + h);
 
 	    boolean hostReachable = false;
-	    try {
-		ProbeAction isReachable = new IsReachableProbe(h, TIMEOUT_MS);
-		hostReachable = isReachable.execute();
-	    } catch (Exception e) {
-		LOG.warn(e.getMessage(), e);
-		LOG.debug(e.getMessage(), e);
+	    if (this.pingProbe) {
+		try {
+		    ProbeAction isReachable = new IsReachableProbe(h, TIMEOUT_MS);
+		    hostReachable = isReachable.execute();
+		} catch (Exception e) {
+		    LOG.warn(e.getMessage(), e);
+		    LOG.debug(e.getMessage(), e);
+		}
+	    } else {
+		LOG.warn("IsReachable/Ping probe has been disabled. Will assume host is reachable for subsequent probes. Ideally this should always be enabled.");
+		hostReachable = true;
 	    }
 
 	    if (hostReachable) {

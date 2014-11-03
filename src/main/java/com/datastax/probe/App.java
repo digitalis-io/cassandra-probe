@@ -46,6 +46,7 @@ public class App {
 		.withDescription(
 			"The path to the CQLSHRC containing security credentails for Cassandra.\nIf this is specified the security credentials will be read from this file and NOT the username/password arguments")
 		.hasArg().withArgName("CQLSHRC").create("c"));
+	options.addOption(OptionBuilder.withLongOpt("ping").withDescription("Execute ping/isReachable probe to Cassandra host").create("p"));
 	options.addOption(OptionBuilder.withLongOpt("storage").withDescription("Probe the storage/gossip port").create("s"));
 	options.addOption(OptionBuilder.withLongOpt("native").withDescription("Probe the native port").create("n"));
 	options.addOption(OptionBuilder.withLongOpt("thrift").withDescription("Probe the thrift port").create("t"));
@@ -87,14 +88,16 @@ public class App {
 	String userName = cmd.getOptionValue("username");
 	String password = cmd.getOptionValue("password");
 
+	boolean pingProbe = true;
 	boolean storageProbe = true;
 	boolean thriftProbe = true;
 	boolean nativeProbe = true;
 
-	if (cmd.hasOption("storage") || cmd.hasOption("thrift") || cmd.hasOption("native")) {
+	if (cmd.hasOption("storage") || cmd.hasOption("thrift") || cmd.hasOption("native") || cmd.hasOption("ping")) {
 	    storageProbe = cmd.hasOption("storage");
 	    thriftProbe = cmd.hasOption("thrift");
 	    nativeProbe = cmd.hasOption("native");
+	    pingProbe = cmd.hasOption("ping");
 	}
 
 	if (StringUtils.isNotBlank(cqlshrc)) {
@@ -120,18 +123,18 @@ public class App {
 		LOG.info("Running probe once only");
 		Prober app = null;
 		if (cqlshrc != null) {
-		    app = new Prober(yaml, cqlshrc, nativeProbe, thriftProbe, storageProbe);
+		    app = new Prober(yaml, cqlshrc, nativeProbe, thriftProbe, storageProbe, pingProbe);
 		} else if (userName != null) {
-		    app = new Prober(yaml, userName, password, nativeProbe, thriftProbe, storageProbe);
+		    app = new Prober(yaml, userName, password, nativeProbe, thriftProbe, storageProbe, pingProbe);
 		} else {
-		    app = new Prober(yaml, nativeProbe, thriftProbe, storageProbe);
+		    app = new Prober(yaml, nativeProbe, thriftProbe, storageProbe, pingProbe);
 		}
 		app.probe();
 		System.exit(0);
 	    } else {
 		LOG.info("Running probe continuously with an interval of " + interval + " seconds between probes");
 		final App app = new App();
-		app.startJob(interval, yaml, cqlshrc, userName, password, nativeProbe, thriftProbe, storageProbe);
+		app.startJob(interval, yaml, cqlshrc, userName, password, nativeProbe, thriftProbe, storageProbe, pingProbe);
 	    }
 	} catch (Exception e) {
 	    String msg = "Problem encountered starting job: " + e.getMessage();
@@ -142,7 +145,7 @@ public class App {
     }
 
     public void startJob(final int intervalInSeconds, final String yamlPath, final String cqlshrcPath, final String userName, final String password, 
-	    final boolean nativeProbe, final boolean thriftProbe, final boolean storageProbe) throws SchedulerException {
+	    final boolean nativeProbe, final boolean thriftProbe, final boolean storageProbe, final boolean pingProbe) throws SchedulerException {
 	final JobDataMap args = new JobDataMap();
 	args.put("cqlshrcPath", cqlshrcPath);
 	args.put("yamlPath", yamlPath);
@@ -151,6 +154,8 @@ public class App {
 	args.put("nativeProbe", nativeProbe);
 	args.put("thriftProbe", thriftProbe);
 	args.put("storageProbe", storageProbe);
+	args.put("pingProbe", pingProbe);
+
 
 	JobDetail job = JobBuilder.newJob(ProbeJob.class).withIdentity("ProbeJob", "cassandra-probe").usingJobData(args).build();
 

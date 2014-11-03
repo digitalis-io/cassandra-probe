@@ -32,6 +32,8 @@ public class ProbeJob implements Job {
 	boolean nativeProbe = dataMap.getBoolean("nativeProbe");
 	boolean thriftProbe = dataMap.getBoolean("thriftProbe");
 	boolean storageProbe = dataMap.getBoolean("storageProbe");
+	boolean pingProbe = dataMap.getBoolean("pingProbe");
+
 
 
 	LOG.info("Instance " + key + " of ProbeJob yamlPath: " + yamlPath + ", and cqlshrcPath is: " + cqlshrcPath);
@@ -40,11 +42,11 @@ public class ProbeJob implements Job {
 	    stopWatch.start();
 	    Prober app = null;
 	    if (StringUtils.isNotBlank(cqlshrcPath)) {
-		app = new Prober(yamlPath, cqlshrcPath, nativeProbe, thriftProbe, storageProbe);
+		app = new Prober(yamlPath, cqlshrcPath, nativeProbe, thriftProbe, storageProbe, pingProbe);
 	    } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
-		app = new Prober(yamlPath, username, password, nativeProbe, thriftProbe, storageProbe);
+		app = new Prober(yamlPath, username, password, nativeProbe, thriftProbe, storageProbe, pingProbe);
 	    } else {
-		app = new Prober(yamlPath, nativeProbe, thriftProbe, storageProbe);
+		app = new Prober(yamlPath, nativeProbe, thriftProbe, storageProbe, pingProbe);
 	    }
 	    app.probe();
 	} catch (Exception e) {
