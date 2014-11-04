@@ -45,7 +45,7 @@ public class App {
 	options.addOption(OptionBuilder
 		.withLongOpt("cqlshrc")
 		.withDescription(
-			"The path to the CQLSHRC containing security credentails for Cassandra.\nIf this is specified the security credentials will be read from this file and NOT the username/password arguments")
+			"The path to the CQLSHRC containing security credentails for Cassandra. If this is specified the security credentials will be read from this file and NOT the username/password arguments")
 		.hasArg().withArgName("CQLSHRC").create("c"));
 	options.addOption(OptionBuilder.withLongOpt("ping").withDescription("Execute ping/isReachable probe to Cassandra host").create("pi"));
 	options.addOption(OptionBuilder.withLongOpt("storage").withDescription("Probe the storage/gossip port").create("st"));
@@ -56,7 +56,7 @@ public class App {
 		.withDescription("Test CQL query to run against cluster").hasArg().withArgName("TEST CQL QUERY")
 		.create("cql"));
 	options.addOption(OptionBuilder.withLongOpt("consistency")
-		.withDescription("The consistency level to execute the test CQL").hasArg().withArgName("CONSISTENCY LEVEL")
+		.withDescription("The consistency level to use for the test CQL statement").hasArg().withArgName("CONSISTENCY LEVEL")
 		.create("con"));
 	options.addOption(OptionBuilder.withLongOpt("tracing").withDescription("Enable query tracing as part of the test query. WARNING - enabling tracing persists data to the system_traces keyspace in the cluster being probed.").create("tr"));
 	
