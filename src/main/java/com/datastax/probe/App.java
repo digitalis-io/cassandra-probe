@@ -35,7 +35,7 @@ public class App {
 	Options options = new Options();
 	options.addOption(OptionBuilder.withLongOpt("help").withDescription("Display help information").create("h"));
 	options.addOption(OptionBuilder.withLongOpt("interval")
-		.withDescription("The interval in seconds between running probe jobs.\nIf not specified or < 1, the probe will be run once only.").hasArg().withArgName("INTERVAL")
+		.withDescription("The interval in seconds between running probe jobs. If not specified or < 1, the probe will be run once only.").hasArg().withArgName("INTERVAL")
 		.create("i"));
 	options.addOption(OptionBuilder.withLongOpt("yaml")
 		.withDescription("The path to the cassandra.yaml to obtain the contact points (via the seeds) and ports Cassandra is listening on").hasArg().withArgName("YAML")
