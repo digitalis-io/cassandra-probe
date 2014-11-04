@@ -1,11 +1,13 @@
 cassandra-probe
 ===============
 
-This project is just a simple java app that reads the [cassandra.yaml](http://www.datastax.com/documentation/cassandra/2.1/cassandra/configuration/configCassandra_yaml_r.html) file off the local file system, 
-connects up to [Cassandra](http://www.datastax.com/documentation/cassandra/2.1/cassandra/gettingStartedCassandraIntro.html) using the seed nodes, discovers all the nodes in the cluster 
+This project is just a simple java app that connects up to [Cassandra](http://www.datastax.com/documentation/cassandra/2.1/cassandra/gettingStartedCassandraIntro.html) discovers and logs out all the nodes in the cluster 
 and then attempts to check each host is reachable (currently just on the rpc_address - if your running the gossip on a different network this wont work) and, if it is, attempts to open a Socket on each of the Cassandra ports that should have Cassandra listening on it.
+You can also pass in some test CQL which will be executed and if required, query tracing can be enabled and the results of the test query will be logged out.
 
-Each probe logs out the time in ms it takes to complete - this is the main goal. 
+Note, this does not yet support testing clusters where the various addresses Cassandra is listening are different.
+
+Each different probe logs out the time in ms it takes to complete with plenty of diagnostic information to help with any problems - this is the main goal. 
 
 I keep coming across situations where there is a lack of monitoring on the network and the ability to do any probing is extremely restrictive.
 
@@ -36,7 +38,7 @@ You will now have an executable jar (with all the dependencies included) located
 Usage:
 ```
 usage: java -jar cassandra-probe-exec.jar
- -c,--cqlshrc <CQLSHRC>                   The path to the CQLSHRC containing security credentails for Cassandra. If this is specified the security credentials will be read
+ -c,--cqlshrc <CQLSHRC>                   The path to the CQLSHRC containing security credentials for Cassandra. If this is specified the security credentials will be read
                                           from this file and NOT the username/password arguments
  -con,--consistency <CONSISTENCY LEVEL>   The consistency level to use for the test CQL statement
  -cp,--contact_points <CASSANDRA HOSTS>   The contact points to use for connecting to Cassandra via the Native protocol. Note - if the cassandra.yaml is provided, this value

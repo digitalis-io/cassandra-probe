@@ -45,7 +45,7 @@ public class App {
 	options.addOption(OptionBuilder
 		.withLongOpt("cqlshrc")
 		.withDescription(
-			"The path to the CQLSHRC containing security credentails for Cassandra. If this is specified the security credentials will be read from this file and NOT the username/password arguments")
+			"The path to the CQLSHRC containing security credentials for Cassandra. If this is specified the security credentials will be read from this file and NOT the username/password arguments")
 		.hasArg().withArgName("CQLSHRC").create("c"));
 	options.addOption(OptionBuilder.withLongOpt("ping").withDescription("Execute ping/isReachable probe to Cassandra host").create("pi"));
 	options.addOption(OptionBuilder.withLongOpt("storage").withDescription("Probe the storage/gossip port").create("st"));
