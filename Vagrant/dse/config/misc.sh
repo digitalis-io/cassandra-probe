@@ -5,7 +5,7 @@ sudo apt-get install ntp
 echo ">>> Finished Installing NTP"
 
 echo ">>> Installing handy stuff"
-sudo apt-get install avahi-utils unzip vim curl zip python-software-properties python-pip git -y
+sudo apt-get sysstat install avahi-utils unzip vim curl zip python-software-properties python-pip git -y
 
 echo ">>> Installing GoLang and pcstat"
 sudo apt-get install golang -y

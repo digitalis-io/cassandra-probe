@@ -58,8 +58,9 @@ public class App {
 	options.addOption(OptionBuilder.withLongOpt("consistency")
 		.withDescription("The consistency level to execute the test CQL").hasArg().withArgName("CONSISTENCY LEVEL")
 		.create("con"));
-	options.addOption(OptionBuilder.withLongOpt("tracing").withDescription("Probe the thrift port").create("tr"));
-
+	options.addOption(OptionBuilder.withLongOpt("tracing").withDescription("Enable query tracing as part of the test query. WARNING - enabling tracing persists data to the system_traces keyspace in the cluster being probed.").create("tr"));
+	
+	
 	
 	return options;
     }
