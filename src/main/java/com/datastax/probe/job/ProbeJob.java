@@ -27,6 +27,7 @@ public class ProbeJob implements Job {
 	JobKey key = context.getJobDetail().getKey();
 	JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 	String yamlPath = dataMap.getString("yamlPath");
+	String[] contactPoints = (String[]) dataMap.get("contactPoints");
 	String cqlshrcPath = dataMap.getString("cqlshrcPath");
 	String username = dataMap.getString("username");
 	String password = dataMap.getString("password");
@@ -38,6 +39,11 @@ public class ProbeJob implements Job {
 	String testCql = dataMap.getString("testCql");
 	ConsistencyLevel consistency = (ConsistencyLevel) dataMap.get("consistency");
 	boolean tracingEnabled = dataMap.getBoolean("tracingEnabled");
+	
+	int storagePort = dataMap.getInt("storagePort");
+	int thriftPort = dataMap.getInt("storagePort");
+	int nativePort = dataMap.getInt("storagePort");
+
 
 
 	LOG.info("Instance " + key + " of ProbeJob yamlPath: " + yamlPath + ", and cqlshrcPath is: " + cqlshrcPath);
@@ -46,11 +52,11 @@ public class ProbeJob implements Job {
 	    stopWatch.start();
 	    Prober app = null;
 	    if (StringUtils.isNotBlank(cqlshrcPath)) {
-		app = new Prober(yamlPath, cqlshrcPath, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
+		app = new Prober(storagePort, nativePort, thriftPort, contactPoints, yamlPath, cqlshrcPath, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 	    } else if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
-		app = new Prober(yamlPath, username, password, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
+		app = new Prober(storagePort, nativePort, thriftPort, contactPoints, yamlPath, username, password, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 	    } else {
-		app = new Prober(yamlPath, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
+		app = new Prober(storagePort, nativePort, thriftPort, contactPoints, yamlPath, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 	    }
 	    app.probe();
 	} catch (Exception e) {

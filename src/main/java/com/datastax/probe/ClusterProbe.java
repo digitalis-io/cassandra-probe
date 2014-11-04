@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -34,7 +35,7 @@ public class ClusterProbe {
     private com.datastax.driver.core.Cluster cassandraCluster;
     private ImmutableSet<HostProbe> hosts;
 
-    private final File cassandraYaml;
+    private File cassandraYaml;
     private final String localHostName;
     private final String user;
     private final String password;
@@ -45,20 +46,26 @@ public class ClusterProbe {
     private String clusterName;
     private Integer storagePort;
     private Integer nativePort;
-    private Integer rpcPort;
+    private Integer thriftPort;
     private String[] contactPoints;
 
-    public ClusterProbe(String localHostName, String cassandraYamlPath, String user, String password) throws IOException {
+    public ClusterProbe(String localHostName, String cassandraYamlPath, String user, String password, int storagePort, int nativePort, int thriftPort, String[] contactPoints) throws IOException {
+	
 	this.localHostName = localHostName;
 	this.user = user;
 	this.password = password;
-	Preconditions.checkNotNull(cassandraYamlPath);
-	this.cassandraYaml = new File(cassandraYamlPath);
-	parseCassandraYaml();
+	this.storagePort = storagePort;
+	this.nativePort = nativePort;
+	this.thriftPort = thriftPort;
+	this.contactPoints = contactPoints;
+	if (StringUtils.isNotBlank(cassandraYamlPath)) {
+	    this.cassandraYaml = new File(cassandraYamlPath);
+	    parseYaml();
+	}
     }
 
     @SuppressWarnings("rawtypes")
-    private void parseCassandraYaml() throws FileNotFoundException {
+    private void parseYaml() throws FileNotFoundException {
 	Preconditions.checkArgument(cassandraYaml.exists(), "Cassandra Yaml file '%s' does not exist", cassandraYaml.getAbsolutePath());
 
 	final InputStream stream = new FileInputStream(this.cassandraYaml);
@@ -74,8 +81,8 @@ public class ClusterProbe {
 	this.nativePort = (Integer) allValues.get("native_transport_port");
 	Preconditions.checkNotNull(nativePort, "native_transport_port not found in inputted yaml '%s'", cassandraYaml.getAbsolutePath());
 
-	this.rpcPort = (Integer) allValues.get("rpc_port");
-	Preconditions.checkNotNull(rpcPort, "rpc_port not found in inputted yaml %s", cassandraYaml.getAbsolutePath());
+	this.thriftPort = (Integer) allValues.get("rpc_port");
+	Preconditions.checkNotNull(this.thriftPort, "rpc_port not found in inputted yaml %s", cassandraYaml.getAbsolutePath());
 
 	this.contactPoints = getSeeds();
 	Preconditions.checkNotNull(contactPoints, "seed_provider contact points not found in inputted yaml %s", cassandraYaml.getAbsolutePath());
@@ -106,7 +113,7 @@ public class ClusterProbe {
 		VersionNumber v = host.getCassandraVersion();
 		String cassandraVersion = v.getMajor() + "." + v.getMinor() + "." + v.getPatch();
 
-		HostProbe hp = new HostProbe(this.localHostName, sockAddress.getHostAddress(), this.nativePort, this.storagePort, this.rpcPort, host.getDatacenter(),
+		HostProbe hp = new HostProbe(this.localHostName, sockAddress.getHostAddress(), this.nativePort, this.storagePort, this.thriftPort, host.getDatacenter(),
 			host.getRack(), cassandraVersion);
 		hostBuilder.add(hp);
 	    }
@@ -195,8 +202,8 @@ public class ClusterProbe {
 	return nativePort;
     }
 
-    public Integer getRpcPort() {
-	return rpcPort;
+    public Integer getThriftPort() {
+	return this.thriftPort;
     }
 
     @SuppressWarnings("rawtypes")

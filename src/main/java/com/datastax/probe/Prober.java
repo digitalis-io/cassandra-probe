@@ -42,10 +42,16 @@ public class Prober {
     private ConsistencyLevel consistency;
 
     private boolean tracingEnabled;
+    private int storagePort;
+    private int nativePort;
+    private int thriftPort;
 
-    public Prober(String yamlPath, String cqlshrcPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe, String testCql,
+    private String[] contactPoints;
+
+    public Prober(int storagePort, int nativePort, int thriftPort, String[] contactPoints, String yamlPath, String cqlshrcPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe, String testCql,
 	    ConsistencyLevel consistency,  boolean tracingEnabled) {
-	Preconditions.checkNotNull(yamlPath, "yaml path must be provided");
+	Preconditions.checkArgument(((contactPoints != null && contactPoints.length > 0) || StringUtils.isBlank(yamlPath)), "contact points or yaml path must be provided");
+	this.contactPoints = contactPoints;
 	this.nativeProbe = nativeProbe;
 	this.thriftProbe = thriftProbe;
 	this.storageProbe = storageProbe;
@@ -61,18 +67,21 @@ public class Prober {
 	this.testCql = testCql;
 	this.consistency = consistency;
 	this.tracingEnabled = tracingEnabled;
+	this.storagePort = storagePort;
+	this.nativePort = nativePort;
+	this.thriftPort = thriftPort;
     }
 
-    public Prober(String yamlPath, String userName, String password, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe, String testCql,
+    public Prober(int storagePort, int nativePort, int thriftPort, String[] contactPoints, String yamlPath, String userName, String password, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe, String testCql,
 	    ConsistencyLevel consistency, boolean tracingEnabled) {
-	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
+	this(storagePort, nativePort, thriftPort, contactPoints, yamlPath, null, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 	Preconditions.checkNotNull(userName, "username must be provided");
 	Preconditions.checkNotNull(password, "password must be provided");
 	this.setUserDetails(userName, password);
     }
 
-    public Prober(String yamlPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe, String testCql, ConsistencyLevel consistency, boolean tracingEnabled) {
-	this(yamlPath, null, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
+    public Prober(int storagePort, int nativePort, int thriftPort, String[] contactPoints, String yamlPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe, String testCql, ConsistencyLevel consistency, boolean tracingEnabled) {
+	this(storagePort, nativePort, thriftPort, contactPoints, yamlPath, null, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
     }
 
     public void parseCqlshRcFile() {
@@ -141,7 +150,7 @@ public class Prober {
     public void probe() throws FatalProbeException, IOException {
 	LOG.info("\n\nNew Probe Commencing....");
 	
-	ClusterProbe cp = new ClusterProbe(this.detectLocalHostname(), this.getYamlPath(), this.user, this.pwd);
+	ClusterProbe cp = new ClusterProbe(this.detectLocalHostname(), this.getYamlPath(), this.user, this.pwd, this.storagePort, this.nativePort, this.thriftPort, this.contactPoints);
 	cp.discoverCluster(true);
 	Set<HostProbe> hosts = cp.getHosts();
 	for (HostProbe h : hosts) {

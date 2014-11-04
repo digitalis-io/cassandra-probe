@@ -60,6 +60,19 @@ public class App {
 		.create("con"));
 	options.addOption(OptionBuilder.withLongOpt("tracing").withDescription("Enable query tracing as part of the test query. WARNING - enabling tracing persists data to the system_traces keyspace in the cluster being probed.").create("tr"));
 	
+	options.addOption(OptionBuilder.withLongOpt("contact_points")
+		.withDescription("The contact points to use for connecting to Cassandra via the Native protocol. Note - if the cassandra.yaml is provided, this value will be ignored").hasArgs().withArgName("CASSANDRA HOSTS")
+		.create("cp"));
+	
+	options.addOption(OptionBuilder.withLongOpt("storage_port")
+		.withDescription("The storage/gossip port. Defaults to 7000. Note - if the cassandra.yaml is provided, this value will be ignored").hasArgs().withArgName("PORT NUMBER")
+		.create("sp"));	
+	options.addOption(OptionBuilder.withLongOpt("native_port")
+		.withDescription("The native port. Defaults to 9042. Note - if the cassandra.yaml is provided, this value will be ignored").hasArgs().withArgName("PORT NUMBER")
+		.create("np"));	
+	options.addOption(OptionBuilder.withLongOpt("thrift_port")
+		.withDescription("The thrift port. Defaults to 9160. Note - if the cassandra.yaml is provided, this value will be ignored").hasArgs().withArgName("PORT NUMBER")
+		.create("tp"));		
 	
 	
 	return options;
@@ -89,11 +102,22 @@ public class App {
 	    App.printHelp();
 	    System.exit(1);
 	}
+	
+	
 
 	int interval = Integer.parseInt(cmd.getOptionValue("interval", "-1"));
 	LOG.info("interval: " + interval);
 	String yaml = cmd.getOptionValue("yaml");
-	LOG.info("yaml: " + yaml);
+	String[] contactPoints = cmd.getOptionValues("contact_points");
+	if (yaml == null && contactPoints == null) {
+	    String msg = "The contact points or the path to the cassandra.yaml must be provided";
+	    LOG.error(msg);
+	    System.err.println(msg);
+	    App.printHelp();
+	    System.exit(1);
+	}
+		
+	LOG.info("yaml: " + yaml+", contact points: "+((contactPoints != null)? Arrays.asList(contactPoints) : contactPoints));
 	String cqlshrc = cmd.getOptionValue("cqlshrc");
 
 	String userName = cmd.getOptionValue("username");
@@ -132,6 +156,12 @@ public class App {
 	String testCql = cmd.getOptionValue("test_cql");
 	String con = cmd.getOptionValue("consistency");
 	boolean tracingEnabled = cmd.hasOption("tracing");
+	
+	int storagePort = Integer.parseInt(cmd.getOptionValue("storage_port", "7000"));
+	int nativePort = Integer.parseInt(cmd.getOptionValue("native_port", "9042"));
+	int thriftPort = Integer.parseInt(cmd.getOptionValue("native_port", "9160"));
+
+
 
 	ConsistencyLevel consistency = null;
 	LOG.debug("Test CQL query '"+testCql+"' and consistency level of '"+con+"'");
@@ -163,18 +193,18 @@ public class App {
 		LOG.info("Running probe once only");
 		Prober app = null;
 		if (cqlshrc != null) {
-		    app = new Prober(yaml, cqlshrc, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
+		    app = new Prober(storagePort, nativePort, thriftPort, contactPoints, yaml, cqlshrc, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 		} else if (userName != null) {
-		    app = new Prober(yaml, userName, password, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
+		    app = new Prober(storagePort, nativePort, thriftPort, contactPoints, yaml, userName, password, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 		} else {
-		    app = new Prober(yaml, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
+		    app = new Prober(storagePort, nativePort, thriftPort, contactPoints, yaml, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 		}
 		app.probe();
 		System.exit(0);
 	    } else {
 		LOG.info("Running probe continuously with an interval of " + interval + " seconds between probes");
 		final App app = new App();
-		app.startJob(interval, yaml, cqlshrc, userName, password, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
+		app.startJob(storagePort, nativePort, thriftPort, interval, contactPoints, yaml, cqlshrc, userName, password, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
 	    }
 	} catch (Exception e) {
 	    String msg = "Problem encountered starting job: " + e.getMessage();
@@ -184,12 +214,13 @@ public class App {
 	}
     }
 
-    public void startJob(final int intervalInSeconds, final String yamlPath, final String cqlshrcPath, final String userName, final String password, 
+    public void startJob(final int storagePort, final int nativePort, final int thriftPort, final int intervalInSeconds, final String[] contactPoints, final String yamlPath, final String cqlshrcPath, final String userName, final String password, 
 	    final boolean nativeProbe, final boolean thriftProbe, final boolean storageProbe, final boolean pingProbe, final String testCql,
 	    final ConsistencyLevel consistency,  final boolean tracingEnabled) throws SchedulerException {
 	final JobDataMap args = new JobDataMap();
 	args.put("cqlshrcPath", cqlshrcPath);
 	args.put("yamlPath", yamlPath);
+	args.put("contactPoints", contactPoints);
 	args.put("username", userName);
 	args.put("password", password);
 	args.put("nativeProbe", nativeProbe);
@@ -198,7 +229,11 @@ public class App {
 	args.put("pingProbe", pingProbe);
 	args.put("testCql", testCql);
 	args.put("consistency", consistency);
-	args.put("tracingEnabled", tracingEnabled);	
+	args.put("tracingEnabled", tracingEnabled);
+	args.put("storagePort", storagePort);	
+	args.put("nativePort", nativePort);	
+	args.put("thriftPort", thriftPort);	
+
 
 	JobDetail job = JobBuilder.newJob(ProbeJob.class).withIdentity("ProbeJob", "cassandra-probe").usingJobData(args).build();
 
