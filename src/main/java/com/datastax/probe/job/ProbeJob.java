@@ -41,8 +41,8 @@ public class ProbeJob implements Job {
 	boolean tracingEnabled = dataMap.getBoolean("tracingEnabled");
 	
 	int storagePort = dataMap.getInt("storagePort");
-	int thriftPort = dataMap.getInt("storagePort");
-	int nativePort = dataMap.getInt("storagePort");
+	int thriftPort = dataMap.getInt("thriftPort");
+	int nativePort = dataMap.getInt("nativePort");
 
 
 
