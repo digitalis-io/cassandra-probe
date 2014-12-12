@@ -1,3 +1,0 @@
-14:53:03.792 [main] INFO  c.datastax.probe.ProbeLoggerFactory - test info
-14:53:03.794 [main] WARN  c.datastax.probe.ProbeLoggerFactory - test warn
-14:53:03.794 [main] ERROR c.datastax.probe.ProbeLoggerFactory - test error
