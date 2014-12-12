@@ -38,29 +38,30 @@ You will now have an executable jar (with all the dependencies included) located
 Usage:
 ```
 usage: java -jar cassandra-probe-exec.jar
- -c,--cqlshrc <CQLSHRC>                   The path to the CQLSHRC containing security credentials for Cassandra. If this is specified the security credentials will be read
-                                          from this file and NOT the username/password arguments
- -con,--consistency <CONSISTENCY LEVEL>   The consistency level to use for the test CQL statement
- -cp,--contact_points <CASSANDRA HOSTS>   The contact points to use for connecting to Cassandra via the Native protocol. Note - if the cassandra.yaml is provided, this value
-                                          will be ignored
- -cql,--test_cql <TEST CQL QUERY>         Test CQL query to run against cluster
- -h,--help                                Display help information
- -i,--interval <INTERVAL>                 The interval in seconds between running probe jobs. If not specified or < 1, the probe will be run once only.
- -ld,--log_dir <LOG DIR>                  The directory path to where the where the probe logs will be written to. If not provided, the application will only output to
-                                          console
- -lmd,--log_max_days <MAX LOG DAYS>       The maximum number of days to keep the daily probe log files for. Rotated on a daily basis. Default is 1.
- -na,--native                             Probe the native port
- -np,--native_port <PORT NUMBER>          The native port. Defaults to 9042. Note - if the cassandra.yaml is provided, this value will be ignored
- -p,--password <PASSWORD>                 The password to connect to Cassandra
- -pi,--ping                               Execute ping/isReachable probe to Cassandra host
- -sp,--storage_port <PORT NUMBER>         The storage/gossip port. Defaults to 7000. Note - if the cassandra.yaml is provided, this value will be ignored
- -st,--storage                            Probe the storage/gossip port
- -th,--thrift                             Probe the thrift port
- -tp,--thrift_port <PORT NUMBER>          The thrift port. Defaults to 9160. Note - if the cassandra.yaml is provided, this value will be ignored
- -tr,--tracing                            Enable query tracing as part of the test query. WARNING - enabling tracing persists data to the system_traces keyspace in the
-                                          cluster being probed.
- -u,--username <USERNAME>                 The username to connect to Cassandra
- -y,--yaml <YAML>                         The path to the cassandra.yaml to obtain the contact points (via the seeds) and ports Cassandra is listening on
+ -c,--cqlshrc <CQLSHRC>                        The path to the CQLSHRC containing security credentials for Cassandra. If this is specified the security credentials will be
+                                               read from this file and NOT the username/password arguments
+ -con,--consistency <CONSISTENCY LEVEL>        The consistency level to use for the test CQL statement
+ -cp,--contact_points <CASSANDRA HOSTS>        The contact points to use for connecting to Cassandra via the Native protocol. Note - if the cassandra.yaml is provided, this
+                                               value will be ignored
+ -cql,--test_cql <TEST CQL QUERY>              Test CQL query to run against cluster
+ -h,--help                                     Display help information
+ -i,--interval <INTERVAL>                      The interval in seconds between running probe jobs. If not specified or < 1, the probe will be run once only.
+ -ld,--log_dir <LOG DIR>                       The directory path to where the where the probe logs will be written to. If not provided, the application will only output to
+                                               console
+ -lmd,--log_max_days <MAX LOG DAYS>            The maximum number of days to keep the daily probe log files for. Rotated on a daily basis. Default is 1.
+ -lmfs,--log_max_file_mb <MAX LOG FILE SIZE>   The maximum size the log file can achieve before its rotated (in addition to the daily rotation). Default is 100MB
+ -na,--native                                  Probe the native port
+ -np,--native_port <PORT NUMBER>               The native port. Defaults to 9042. Note - if the cassandra.yaml is provided, this value will be ignored
+ -p,--password <PASSWORD>                      The password to connect to Cassandra
+ -pi,--ping                                    Execute ping/isReachable probe to Cassandra host
+ -sp,--storage_port <PORT NUMBER>              The storage/gossip port. Defaults to 7000. Note - if the cassandra.yaml is provided, this value will be ignored
+ -st,--storage                                 Probe the storage/gossip port
+ -th,--thrift                                  Probe the thrift port
+ -tp,--thrift_port <PORT NUMBER>               The thrift port. Defaults to 9160. Note - if the cassandra.yaml is provided, this value will be ignored
+ -tr,--tracing                                 Enable query tracing as part of the test query. WARNING - enabling tracing persists data to the system_traces keyspace in the
+                                               cluster being probed.
+ -u,--username <USERNAME>                      The username to connect to Cassandra
+ -y,--yaml <YAML>                              The path to the cassandra.yaml to obtain the contact points (via the seeds) and ports Cassandra is listening on
 
  
 ```

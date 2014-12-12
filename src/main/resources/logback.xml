@@ -1,8 +1,8 @@
 <configuration>
 
     <property name="MYAPP_LOG_FILE" value="cassandra-probe.log" scope="CONTEXT"/>
-    <property name="MYAPP_ROLLING_TEMPLATE" value="%d{yy-MM-dd}" scope="CONTEXT" />
-    <property name="MYAPP_OLD_LOG_FILE" value="${MYAPP_LOG_FILE}.%d{yy-MM-dd}" scope="CONTEXT"/>
+    <property name="MYAPP_ROLLING_TEMPLATE" value="%d{yy-MM-dd}.%i" scope="CONTEXT" />
+    <property name="MYAPP_OLD_LOG_FILE" value="${MYAPP_LOG_FILE}.%d{yy-MM-dd}.%i" scope="CONTEXT"/>
     <property name="DEFAULT_PATTERN" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" scope="CONTEXT" />
 
 

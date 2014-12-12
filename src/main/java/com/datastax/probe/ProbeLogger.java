@@ -7,9 +7,11 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.rolling.DefaultTimeBasedFileNamingAndTriggeringPolicy;
 import ch.qos.logback.core.rolling.RollingFileAppender;
+import ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
+
+import com.google.common.base.Preconditions;
 
 public class ProbeLogger {
 
@@ -19,12 +21,16 @@ public class ProbeLogger {
     boolean customFilePath = false;
 
     public ProbeLogger() {
-	this(null, -1);
+	this(null, -1, -1);
     }
 
-    public ProbeLogger(String filePath, int maxHistory) {
+    public ProbeLogger(String filePath, int maxHistory, int maxFileSizeMb) {
 	loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 	if (StringUtils.isNotEmpty(filePath)) {
+	    Preconditions.checkArgument(maxHistory >= 1, "Max File History must be >= 1");
+	    Preconditions.checkArgument(maxFileSizeMb >= 1, "Max File Size in MB must be >= 1");
+
+	    
 	    ch.qos.logback.classic.Logger templateLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ProbeLogger.class);
 	    loggerContext = templateLogger.getLoggerContext();
 
@@ -46,8 +52,12 @@ public class ProbeLogger {
 	    encoder.setPattern(pattern);
 	    encoder.setContext(loggerContext);
 
-	    DefaultTimeBasedFileNamingAndTriggeringPolicy<ILoggingEvent> timeBasedTriggeringPolicy = new DefaultTimeBasedFileNamingAndTriggeringPolicy<ILoggingEvent>();
+	    
+	    //DefaultTimeBasedFileNamingAndTriggeringPolicy<ILoggingEvent> timeBasedTriggeringPolicy = new DefaultTimeBasedFileNamingAndTriggeringPolicy<ILoggingEvent>();
+
+	    SizeAndTimeBasedFNATP<ILoggingEvent> timeBasedTriggeringPolicy = new SizeAndTimeBasedFNATP<ILoggingEvent>();
 	    timeBasedTriggeringPolicy.setContext(loggerContext);
+	    timeBasedTriggeringPolicy.setMaxFileSize(maxFileSizeMb+"MB");
 
 	    TimeBasedRollingPolicy<ILoggingEvent> timeBasedRollingPolicy = new TimeBasedRollingPolicy<ILoggingEvent>();
 	    timeBasedRollingPolicy.setContext(loggerContext);

@@ -81,6 +81,9 @@ public class App {
 	options.addOption(OptionBuilder.withLongOpt("log_max_days")
 		.withDescription("The maximum number of days to keep the daily probe log files for. Rotated on a daily basis. Default is 1.").hasArgs().withArgName("MAX LOG DAYS")
 		.create("lmd"));	
+	options.addOption(OptionBuilder.withLongOpt("log_max_file_mb")
+		.withDescription("The maximum size the log file can achieve before its rotated (in addition to the daily rotation). Default is 100MB").hasArgs().withArgName("MAX LOG FILE SIZE")
+		.create("lmfs"));	
 
 	return options;
     }
@@ -114,13 +117,18 @@ public class App {
 	    
 	    int maxHistory = 1;
 	    String maxLog = cmd.getOptionValue("log_max_days");
-	    System.out.println("maxLog: "+maxLog);
 	    if (StringUtils.isNotBlank(maxLog)) {
 		maxHistory = Integer.parseInt(maxLog);
 	    } 
 	    
-	    System.out.println("Log Directory is "+logDir+" and max log days to keep is "+maxHistory);
-	    ProbeLoggerFactory.init(logDir.trim(), maxHistory);
+	    int maxFileSizeMb = 100;
+	    String maxFileSize = cmd.getOptionValue("log_max_file_mb");
+	    if (StringUtils.isNotBlank(maxFileSize)) {
+		maxFileSizeMb = Integer.parseInt(maxFileSize);
+	    }  
+	    
+	    System.out.println("Log Directory is "+logDir+", max log days to keep is "+maxHistory+", max log file size is "+maxFileSizeMb+"MB");
+	    ProbeLoggerFactory.init(logDir.trim(), maxHistory, maxFileSizeMb);
 	}
 
 	Logger logger = ProbeLoggerFactory.getLogger(App.class);
@@ -204,6 +212,7 @@ public class App {
 	} else {
 	    logger.info("No Test CQL query required");
 	}
+	
 
 	try {
 	    if (interval < 1) {
