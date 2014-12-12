@@ -35,6 +35,8 @@ mvn clean compile assembly:single
 
 You will now have an executable jar (with all the dependencies included) located at `target/cassandra-probe-exec.jar` !
 
+You can also [download](cassandra-probe-exec.jar) a compiled version of the jar if you don't feel like building it yourself.
+
 Usage:
 ```
 usage: java -jar cassandra-probe-exec.jar
