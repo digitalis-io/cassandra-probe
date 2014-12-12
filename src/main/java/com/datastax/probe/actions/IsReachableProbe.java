@@ -3,14 +3,15 @@ package com.datastax.probe.actions;
 import java.net.InetAddress;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Logger;
+
+import com.datastax.probe.ProbeLoggerFactory;
 import com.datastax.probe.model.HostProbe;
 
 public class IsReachableProbe implements ProbeAction {
-
-    private static final Logger LOG = LoggerFactory.getLogger(IsReachableProbe.class);
+    
+    private static final Logger LOG = ProbeLoggerFactory.getLogger(IsReachableProbe.class);
 
     private final HostProbe host;
     private final int timeOutMs;

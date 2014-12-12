@@ -38,6 +38,7 @@
 		<metrics-graphite.version>3.0.2</metrics-graphite.version>
 		<quartz.version>2.2.1</quartz.version>
 		<commons-cli.version>1.2</commons-cli.version>
+		<log4j.version>1.2</log4j.version>
 	</properties>
 	<dependencies>
 		<dependency>

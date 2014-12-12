@@ -15,13 +15,22 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.yaml.snakeyaml.Yaml;
 
+import ch.qos.logback.classic.Logger;
+
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.Host;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.VersionNumber;
+import com.datastax.driver.core.exceptions.AuthenticationException;
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
+import com.datastax.driver.core.exceptions.ReadTimeoutException;
+import com.datastax.driver.core.exceptions.UnauthorizedException;
+import com.datastax.driver.core.exceptions.UnavailableException;
+import com.datastax.driver.core.exceptions.UnsupportedFeatureException;
+import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.probe.model.HostProbe;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -30,7 +39,7 @@ import com.google.common.collect.ImmutableSet.Builder;
 
 public class ClusterProbe {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ClusterProbe.class);
+    private static final Logger LOG = ProbeLoggerFactory.getLogger(ClusterProbe.class);
 
     private com.datastax.driver.core.Cluster cassandraCluster;
     private ImmutableSet<HostProbe> hosts;
@@ -120,6 +129,77 @@ public class ClusterProbe {
 
 	    LOG.info(b.toString());
 	    this.hosts = hostBuilder.build();
+	} catch (UnauthorizedException e) {
+	    e.printStackTrace(System.err);
+	    String msg = "Fatal error. User is not authorized : " + e.getMessage();
+	    System.err.println(msg);
+	    LOG.error(msg, e);
+	    throw e;
+	} catch (AuthenticationException e) {
+	    InetSocketAddress errorHost = e.getAddress();
+	    String msg = "Fatal error. Unable to authenticate Cassandra user against Cassandra node '" + errorHost.toString() + "': " + e.getMessage();
+	    e.printStackTrace(System.err);
+	    System.err.println(msg);
+	    LOG.error(msg, e);
+	    throw e;
+	} catch (UnsupportedFeatureException e) {
+	    e.printStackTrace(System.err);
+	    String msg = "Fatal error. The feature being used is not compatable with the version of Cassandra being probed: " + e.getMessage();
+	    System.err.println(msg);
+	    LOG.error(msg, e);
+	    throw e;
+	} catch (NoHostAvailableException e) {
+	    Map<InetSocketAddress, Throwable> errors = e.getErrors();
+	    StringBuilder errorMesages = new StringBuilder("Unable to establish a client connection to any Cassandra node: " + e.getMessage() + ". Tried: ");
+	    if (errors != null && errors.size() > 0) {
+		for (InetSocketAddress address : errors.keySet()) {
+		    Throwable throwable = errors.get(address);
+		    String stackTrace = ExceptionUtils.getStackTrace(throwable);
+		    errorMesages.append("\n\t" + address.toString() + " : " + throwable.getMessage());
+		    errorMesages.append("\n\t" + stackTrace);
+		}
+	    }
+	    e.printStackTrace(System.err);
+	    System.err.println(errorMesages.toString());
+	    LOG.error(errorMesages.toString(), e);
+	    throw e;
+
+	} catch (UnavailableException e) {
+	    int aliveReplicas = e.getAliveReplicas();
+	    int requiredReplicas = e.getRequiredReplicas();
+	    ConsistencyLevel cl = e.getConsistencyLevel();
+	    e.printStackTrace(System.err);
+	    String msg = aliveReplicas + " replicas are alive. " + requiredReplicas
+		    + " are requried. There is not enough replicas alive to achieve the requested consistency level of '" + cl + "' : " + e.getMessage();
+	    System.err.println(msg);
+	    LOG.error(msg, e);
+	    throw e;
+	} catch (ReadTimeoutException e) {
+	    int receivedAcknowledgements = e.getReceivedAcknowledgements();
+	    int requiredAcknowledgements = e.getRequiredAcknowledgements();
+	    ConsistencyLevel cl = e.getConsistencyLevel();
+	    e.printStackTrace(System.err);
+	    String msg = receivedAcknowledgements + " read acknowlegement(s) recieved. " + requiredAcknowledgements
+		    + " read acknowlegement(s) are required for read consistency level of '" + cl + "'. Not enough replicas responded in time : " + e.getMessage();
+	    System.err.println(msg);
+	    LOG.warn(msg, e);
+	    throw e;
+	} catch (WriteTimeoutException e) {
+	    int receivedAcknowledgements = e.getReceivedAcknowledgements();
+	    int requiredAcknowledgements = e.getRequiredAcknowledgements();
+	    ConsistencyLevel cl = e.getConsistencyLevel();
+	    e.printStackTrace(System.err);
+	    String msg = receivedAcknowledgements + " write acknowlegement(s) recieved. " + requiredAcknowledgements
+		    + " write acknowlegement(s) are required for write consistency level of '" + cl + "'. Not enough nodes responded in time : " + e.getMessage();
+	    System.err.println(msg);
+	    LOG.warn(msg, e);
+	    throw e;
+	} catch (Throwable t) {
+	    t.printStackTrace(System.err);
+	    String msg = "Unexpected error encountered: " + t.getMessage();
+	    System.err.println(msg);
+	    LOG.warn(msg, t);
+	    throw t;
 	} finally {
 	    if (!keepAlive) {
 		this.shutDownCluster();

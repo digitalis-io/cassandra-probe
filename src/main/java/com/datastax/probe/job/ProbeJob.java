@@ -8,16 +8,17 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Logger;
 
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.probe.ProbeLoggerFactory;
 import com.datastax.probe.Prober;
 
 @DisallowConcurrentExecution
 public class ProbeJob implements Job {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProbeJob.class);
+    private static final Logger LOG = ProbeLoggerFactory.getLogger(ProbeJob.class);
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -43,8 +44,6 @@ public class ProbeJob implements Job {
 	int storagePort = dataMap.getInt("storagePort");
 	int thriftPort = dataMap.getInt("thriftPort");
 	int nativePort = dataMap.getInt("nativePort");
-
-
 
 	LOG.info("Instance " + key + " of ProbeJob yamlPath: " + yamlPath + ", and cqlshrcPath is: " + cqlshrcPath);
 

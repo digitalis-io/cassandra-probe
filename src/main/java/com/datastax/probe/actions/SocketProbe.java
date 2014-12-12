@@ -7,14 +7,15 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Logger;
+
+import com.datastax.probe.ProbeLoggerFactory;
 import com.datastax.probe.model.HostProbe;
 
 public class SocketProbe implements ProbeAction {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SocketProbe.class);
+    private static final Logger LOG = ProbeLoggerFactory.getLogger(SocketProbe.class);
 
     private int port;
     private final HostProbe host;

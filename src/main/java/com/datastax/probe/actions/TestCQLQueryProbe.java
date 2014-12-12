@@ -8,8 +8,8 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Logger;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ConsistencyLevel;
@@ -29,14 +29,16 @@ import com.datastax.driver.core.exceptions.UnavailableException;
 import com.datastax.driver.core.exceptions.UnsupportedFeatureException;
 import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.probe.ClusterProbe;
+import com.datastax.probe.ProbeLoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
 public class TestCQLQueryProbe implements ProbeAction {
     
+    private static final Logger LOG = ProbeLoggerFactory.getLogger(TestCQLQueryProbe.class);
+
     private SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSS");
     
-    private static final Logger LOG = LoggerFactory.getLogger(TestCQLQueryProbe.class);
     private static final ImmutableSet<String> PERMITTED_CQL_ACTIONS = ImmutableSet.of("select", "insert", "update");
 
     private Cluster cluster;

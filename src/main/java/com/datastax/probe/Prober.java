@@ -9,8 +9,8 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Logger;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ConsistencyLevel;
@@ -26,7 +26,7 @@ public class Prober {
 
     private static final int TIMEOUT_MS = 10000;
 
-    private static final Logger LOG = LoggerFactory.getLogger(Prober.class);
+    private static final Logger LOG = ProbeLoggerFactory.getLogger(Prober.class);
     private final String yamlPath;
     private String cqlshrcPath;
 
