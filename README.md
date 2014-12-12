@@ -54,7 +54,7 @@ usage: java -jar cassandra-probe-exec.jar
  -cql,--test_cql <TEST CQL QUERY>              Test CQL query to run against cluster
  -h,--help                                     Display help information
  -i,--interval <INTERVAL>                      The interval in seconds between running probe jobs. If not specified or < 1, the probe will be run once only.
- -ld,--log_dir <LOG DIR>                       The directory path to where the where the probe logs will be written to. If not provided, the application will only output to
+ -ld,--log_dir <LOG DIR>                       The directory path to where the probe logs will be written to. If not provided, the application will only output to
                                                console
  -lmd,--log_max_days <MAX LOG DAYS>            The maximum number of days to keep the daily probe log files for. Rotated on a daily basis. Default is 1.
  -lmfs,--log_max_file_mb <MAX LOG FILE SIZE>   The maximum size the log file can achieve before its rotated (in addition to the daily rotation). Default is 100MB

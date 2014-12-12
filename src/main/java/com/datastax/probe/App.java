@@ -76,7 +76,7 @@ public class App {
 		.create("tp"));
 
 	options.addOption(OptionBuilder.withLongOpt("log_dir")
-		.withDescription("The directory path to where the where the probe logs will be written to. If not provided, the application will only output to console").hasArg()
+		.withDescription("The directory path to where the probe logs will be written to. If not provided, the application will only output to console").hasArg()
 		.withArgName("LOG DIR").create("ld"));
 	options.addOption(OptionBuilder.withLongOpt("log_max_days")
 		.withDescription("The maximum number of days to keep the daily probe log files for. Rotated on a daily basis. Default is 1.").hasArgs().withArgName("MAX LOG DAYS")
