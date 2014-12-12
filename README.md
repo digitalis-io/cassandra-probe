@@ -259,6 +259,9 @@ New Probe Commencing....
 
 ```
 
+Licensing and contributions
+---------------------------
 
+This code and files are released under the [Apache 2.0 License](https://github.com/millerjp/cassandra-probe/blob/master/LICENSE). Contributions and suggestions are welcome. You can find me on twitter @CyanMiller.
 
 
