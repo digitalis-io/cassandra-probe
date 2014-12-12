@@ -21,10 +21,10 @@ Vagrant/statsd-graphite/.vagrant
 *.class
  
 # Package Files #
-*.jar
-*.war
-*.ear
-*.db
+target/*.jar
+target/*.war
+target/*.ear
+target/*.db
  
 ######################
 # Windows
