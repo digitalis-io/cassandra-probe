@@ -78,6 +78,9 @@ public class App {
 	options.addOption(OptionBuilder.withLongOpt("log_dir")
 		.withDescription("The directory path to where the where the probe logs will be written to. If not provided, the application will only output to console").hasArg()
 		.withArgName("LOG DIR").create("ld"));
+	options.addOption(OptionBuilder.withLongOpt("log_max_days")
+		.withDescription("The maximum number of days to keep the daily probe log files for. Rotated on a daily basis. Default is 1.").hasArgs().withArgName("MAX LOG DAYS")
+		.create("lmd"));	
 
 	return options;
     }
@@ -108,8 +111,16 @@ public class App {
 
 	String logDir = cmd.getOptionValue("log_dir");
 	if (StringUtils.isNotBlank(logDir)) {
-	    System.out.println("Log Directory is "+logDir);
-	    ProbeLoggerFactory.init(logDir.trim());
+	    
+	    int maxHistory = 1;
+	    String maxLog = cmd.getOptionValue("log_max_days");
+	    System.out.println("maxLog: "+maxLog);
+	    if (StringUtils.isNotBlank(maxLog)) {
+		maxHistory = Integer.parseInt(maxLog);
+	    } 
+	    
+	    System.out.println("Log Directory is "+logDir+" and max log days to keep is "+maxHistory);
+	    ProbeLoggerFactory.init(logDir.trim(), maxHistory);
 	}
 
 	Logger logger = ProbeLoggerFactory.getLogger(App.class);

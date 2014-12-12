@@ -112,7 +112,6 @@ public class ClusterProbe {
 	    this.cassandraCluster.init();
 
 	    Builder<HostProbe> hostBuilder = ImmutableSet.<HostProbe> builder();
-
 	    Metadata metadata = this.cassandraCluster.getMetadata();
 	    Set<Host> allHosts = metadata.getAllHosts();
 	    StringBuilder b = new StringBuilder("\nDiscovered Cassandra Cluster '" + this.clusterName + "' details via native driver from host '" + this.localHostName + "' :");
@@ -120,6 +119,8 @@ public class ClusterProbe {
 		b.append(ClusterProbe.prettyHost(host));
 		InetAddress sockAddress = host.getSocketAddress().getAddress();
 		VersionNumber v = host.getCassandraVersion();
+		
+		
 		String cassandraVersion = v.getMajor() + "." + v.getMinor() + "." + v.getPatch();
 
 		HostProbe hp = new HostProbe(this.localHostName, sockAddress.getHostAddress(), this.nativePort, this.storagePort, this.thriftPort, host.getDatacenter(),

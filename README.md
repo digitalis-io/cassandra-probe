@@ -48,6 +48,7 @@ usage: java -jar cassandra-probe-exec.jar
  -i,--interval <INTERVAL>                 The interval in seconds between running probe jobs. If not specified or < 1, the probe will be run once only.
  -ld,--log_dir <LOG DIR>                  The directory path to where the where the probe logs will be written to. If not provided, the application will only output to
                                           console
+ -lmd,--log_max_days <MAX LOG DAYS>       The maximum number of days to keep the daily probe log files for. Rotated on a daily basis. Default is 1.
  -na,--native                             Probe the native port
  -np,--native_port <PORT NUMBER>          The native port. Defaults to 9042. Note - if the cassandra.yaml is provided, this value will be ignored
  -p,--password <PASSWORD>                 The password to connect to Cassandra
@@ -59,7 +60,8 @@ usage: java -jar cassandra-probe-exec.jar
  -tr,--tracing                            Enable query tracing as part of the test query. WARNING - enabling tracing persists data to the system_traces keyspace in the
                                           cluster being probed.
  -u,--username <USERNAME>                 The username to connect to Cassandra
- -y,--yaml <YAML>                         The path to the cassandra.yaml to obtain the contact points (via the seeds) and ports Cassandra is listening on.
+ -y,--yaml <YAML>                         The path to the cassandra.yaml to obtain the contact points (via the seeds) and ports Cassandra is listening on
+
  
 ```
 
