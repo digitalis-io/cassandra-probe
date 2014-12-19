@@ -2,10 +2,10 @@ cassandra-probe
 ===============
 
 This project is just a simple java app that connects up to [Cassandra](http://www.datastax.com/documentation/cassandra/2.1/cassandra/gettingStartedCassandraIntro.html), discovers and logs out all the nodes in the cluster 
-and then attempts to check each host is reachable (currently just on the rpc_address - if your running the gossip on a different network this wont work) and, if it is, attempts to open a Socket on each of the Cassandra ports that should have Cassandra listening on it.
+and then attempts to check each host is reachable (currently just on the rpc_address - if your running the gossip on a different network this wont work) and, if it is, attempts to ping the node and open a Socket on each of the Cassandra ports that Cassandra should be listening on it.
 You can also pass in some test CQL which will be executed and if required, query tracing can be enabled and the results of the test query will be logged out.
 
-Note, this does not yet support testing clusters where the various addresses Cassandra is listening are different if configurations is being driven by the cassandra.yaml.
+Note, this does not yet support testing clusters where the various addresses Cassandra is listening on are different (if configurations is being driven by the cassandra.yaml).
 
 Each different probe logs out the time in ms it takes to complete and also includes plenty of diagnostic information to help with any problems - this is the main goal. 
 
