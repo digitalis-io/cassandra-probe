@@ -5,7 +5,7 @@ This project is just a simple java app that connects up to [Cassandra](http://ww
 and then attempts to check each host is reachable (currently just on the rpc_address - if your running the gossip on a different network this wont work) and, if it is, attempts to ping the node and open a Socket on each of the Cassandra ports that Cassandra should be listening on it.
 You can also pass in some test CQL which will be executed and if required, query tracing can be enabled and the results of the test query will be logged out.
 
-Note, this does not yet support testing clusters where the various addresses Cassandra is listening on are different (if configurations is being driven by the cassandra.yaml).
+Note, this does not yet support testing clusters where the various addresses Cassandra is listening on are different (if configuration is being driven by the cassandra.yaml).
 
 Each different probe logs out the time in ms it takes to complete and also includes plenty of diagnostic information to help with any problems - this is the main goal. 
 
@@ -81,13 +81,13 @@ scp target/cassandra-probe-exec.jar your_username@someremotehost:/some/remote/di
 
 ```
 
-Then connect up to the Cassandra server and run execute the jar.
+Then connect up to the Cassandra server and execute the jar.
 
-You can have the probe run continuously with an interval between probes passed in seconds. Note - overlapping probe jobs will not occur. 
+You can have the probe run continuously with an interval between probes in seconds. Note - overlapping probe jobs will not occur. 
 
 If the Cassandra cluster has authentication enabled you need to pass in the username and password or the path to the [cqlshrc](http://www.datastax.com/documentation/cql/3.1/cql/cql_reference/cqlsh.html?scroll=refCqlsh__cqlshUsingCqlshrc) file on the local file system - this will contain the security credentials needed to connect.
 
-If you want to run the probe once only and then exit then don't pass in an in interval.
+If you want to run the probe once only and then exit then just don't pass in an interval.
 
 For example:
 ```
@@ -262,6 +262,6 @@ New Probe Commencing....
 Licensing and contributions
 ---------------------------
 
-This code and files are released under the [Apache 2.0 License](https://github.com/millerjp/cassandra-probe/blob/master/LICENSE). Contributions and suggestions are welcome. You can find me on twitter @CyanMiller.
+This code and files are released under the [Apache 2.0 License](https://github.com/millerjp/cassandra-probe/blob/master/LICENSE). Contributions and suggestions are welcome. You can find me on twitter [@CyanMiller](https://twitter.com/CyanMiller).
 
 
