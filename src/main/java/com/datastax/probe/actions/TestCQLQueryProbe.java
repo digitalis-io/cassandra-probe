@@ -156,7 +156,15 @@ public class TestCQLQueryProbe implements ProbeAction {
 		    Thread.sleep(1000); //sleep a bit to allow tracing info to propagate
 		} catch (InterruptedException e) {
 		}
-		logExecutionInfo("Query trace for '" + this.cqlQuery + "'", rs.getExecutionInfo());
+		
+		try {
+		    ExecutionInfo executionInfo = rs.getExecutionInfo();
+		    logExecutionInfo("Query trace for '" + this.cqlQuery + "'", executionInfo);
+		} catch (Exception e) {
+		    e.printStackTrace(System.err);
+		    String msg = "Problem encountered retrieving query execution info '" + this.cqlQuery + "': " + e.getMessage();
+		    LOG.error(msg, e);
+		}
 	    }
 
 	} catch (UnauthorizedException e) {
@@ -164,7 +172,7 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    e.printStackTrace(System.err);
 	    String msg = "Fatal error. User is not authorized to perform CQL statement '" + this.cqlQuery + "': " + e.getMessage();
 	    System.err.println(msg);
-	    LOG.error(msg);
+	    LOG.error(msg, e);
 	    System.exit(1);
 
 	} catch (AuthenticationException e) {
@@ -173,7 +181,7 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    String msg = "Fatal error. Unable to authenticate Cassandra user against Cassandra node '" + errorHost.toString() + "': " + e.getMessage();
 	    e.printStackTrace(System.err);
 	    System.err.println(msg);
-	    LOG.error(msg);
+	    LOG.error(msg, e);
 	    System.exit(1);
 
 	} catch (QueryValidationException e) {
@@ -181,7 +189,7 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    e.printStackTrace(System.err);
 	    String msg = "Fatal error. The test CQL statement '" + this.cqlQuery + "' is not valid: " + e.getMessage();
 	    System.err.println(msg);
-	    LOG.error(msg);
+	    LOG.error(msg, e);
 	    System.exit(1);
 
 	} catch (UnsupportedFeatureException e) {
@@ -206,7 +214,7 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    }
 	    e.printStackTrace(System.err);
 	    System.err.println(errorMesages.toString());
-	    LOG.error(errorMesages.toString());
+	    LOG.error(errorMesages.toString(), e);
 
 	} catch (UnavailableException e) {
 	    logCluster(this.cluster);
@@ -217,7 +225,7 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    String msg = aliveReplicas + " replicas are alive. " + requiredReplicas
 		    + " are requried. There is not enough replicas alive to achieve the requested consistency level of '" + cl + "' : " + e.getMessage();
 	    System.err.println(msg);
-	    LOG.error(msg);
+	    LOG.error(msg, e);
 
 	} catch (ReadTimeoutException e) {
 	    logCluster(this.cluster);
@@ -239,14 +247,14 @@ public class TestCQLQueryProbe implements ProbeAction {
 	    String msg = receivedAcknowledgements + " write acknowlegement(s) recieved. " + requiredAcknowledgements
 		    + " write acknowlegement(s) are required for write consistency level of '" + cl + "'. Not enough nodes responded in time : " + e.getMessage();
 	    System.err.println(msg);
-	    LOG.warn(msg);
+	    LOG.warn(msg, e);
 
 	} catch (Throwable t) {
 	    logCluster(this.cluster);
 	    t.printStackTrace(System.err);
 	    String msg = "Unexpected error encountered: " + t.getMessage();
 	    System.err.println(msg);
-	    LOG.warn(msg);
+	    LOG.error(msg, t);
 	}
 
 	return result;
