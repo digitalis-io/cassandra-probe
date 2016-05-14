@@ -92,11 +92,11 @@ If you want to run the probe once only and then exit then just don't pass in an 
 For example:
 ```
 root@dse-cass2:/tmp# java -jar /tmp/cassandra-probe-exec.jar -cql "select * from system_auth.users where name = 'cassandra';" -consistency QUORUM -tracing -u cassandra -p cassandra -contact_points 10.211.56.111 10.211.56.112 -interval 10
-12:17:07.089 [main] INFO  com.datastax.probe.App - interval: 10
-12:17:07.092 [main] INFO  com.datastax.probe.App - yaml: null, contact points: [10.211.56.111, 10.211.56.112]
-12:17:07.096 [main] INFO  com.datastax.probe.App - Username/password authentication is provided
-12:17:07.096 [main] INFO  com.datastax.probe.App - Test CQL query 'select * from system_auth.users where name = 'cassandra';' will be executed at Consistency level of 'QUORUM' with tracing enabled true
-12:17:07.097 [main] INFO  com.datastax.probe.App - Running probe continuously with an interval of 10 seconds between probes
+12:17:07.089 [main] INFO  App - interval: 10
+12:17:07.092 [main] INFO  App - yaml: null, contact points: [10.211.56.111, 10.211.56.112]
+12:17:07.096 [main] INFO  App - Username/password authentication is provided
+12:17:07.096 [main] INFO  App - Test CQL query 'select * from system_auth.users where name = 'cassandra';' will be executed at Consistency level of 'QUORUM' with tracing enabled true
+12:17:07.097 [main] INFO  App - Running probe continuously with an interval of 10 seconds between probes
 12:17:07.142 [main] INFO  org.quartz.impl.StdSchedulerFactory - Using default implementation for ThreadExecutor
 12:17:07.145 [main] INFO  org.quartz.simpl.SimpleThreadPool - Job execution threads will use class loader of thread: main
 12:17:07.155 [main] INFO  o.quartz.core.SchedulerSignalerImpl - Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
@@ -113,14 +113,14 @@ root@dse-cass2:/tmp# java -jar /tmp/cassandra-probe-exec.jar -cql "select * from
 12:17:07.157 [main] INFO  org.quartz.impl.StdSchedulerFactory - Quartz scheduler 'DefaultQuartzScheduler' initialized from default resource file in Quartz package: 'quartz.properties'
 12:17:07.157 [main] INFO  org.quartz.impl.StdSchedulerFactory - Quartz scheduler version: 2.2.1
 12:17:07.157 [main] INFO  org.quartz.core.QuartzScheduler - Scheduler DefaultQuartzScheduler_$_NON_CLUSTERED started.
-12:17:07.173 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.job.ProbeJob - ProbeJob running...
-12:17:07.175 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.job.ProbeJob - Instance cassandra-probe.ProbeJob of ProbeJob yamlPath: null, and cqlshrcPath is: null
-12:17:07.177 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.Prober - No CQLSHRC file provided. Cassandra will be connected to without authentication
-12:17:07.177 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.Prober - Username and password provided. Cassandra connection will be authenticated
-12:17:07.177 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.Prober - 
+12:17:07.173 [DefaultQuartzScheduler_Worker-1] INFO  ProbeJob - ProbeJob running...
+12:17:07.175 [DefaultQuartzScheduler_Worker-1] INFO  ProbeJob - Instance cassandra-probe.ProbeJob of ProbeJob yamlPath: null, and cqlshrcPath is: null
+12:17:07.177 [DefaultQuartzScheduler_Worker-1] INFO  Prober - No CQLSHRC file provided. Cassandra will be connected to without authentication
+12:17:07.177 [DefaultQuartzScheduler_Worker-1] INFO  Prober - Username and password provided. Cassandra connection will be authenticated
+12:17:07.177 [DefaultQuartzScheduler_Worker-1] INFO  Prober -
 
 New Probe Commencing....
-12:17:07.177 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.ClusterProbe - About to discover cluster 'null' details using seed contact points: [10.211.56.111, 10.211.56.112]
+12:17:07.177 [DefaultQuartzScheduler_Worker-1] INFO  ClusterProbe - About to discover cluster 'null' details using seed contact points: [10.211.56.111, 10.211.56.112]
 12:17:07.181 [DefaultQuartzScheduler_Worker-1] WARN  c.d.driver.core.FrameCompressor - Cannot find Snappy class, you should make sure the Snappy library is in the classpath if you intend to use it. Snappy compression will not be available for the protocol.
 12:17:07.181 [DefaultQuartzScheduler_Worker-1] WARN  c.d.driver.core.FrameCompressor - Cannot find LZ4 class, you should make sure the LZ4 library is in the classpath if you intend to use it. LZ4 compression will not be available for the protocol.
 12:17:07.589 [DefaultQuartzScheduler_Worker-1] INFO  c.d.d.c.p.DCAwareRoundRobinPolicy - Using data-center name 'DC1' for DCAwareRoundRobinPolicy (if this is incorrect, please provide the correct datacenter name with DCAwareRoundRobinPolicy constructor)
@@ -128,7 +128,7 @@ New Probe Commencing....
 12:17:07.591 [Cassandra Java Driver worker-1] INFO  com.datastax.driver.core.Cluster - New Cassandra host /10.211.56.111:9042 added
 12:17:07.591 [Cassandra Java Driver worker-2] INFO  com.datastax.driver.core.Cluster - New Cassandra host /10.211.56.110:9042 added
 12:17:07.591 [Cassandra Java Driver worker-3] INFO  com.datastax.driver.core.Cluster - New Cassandra host /10.211.56.113:9042 added
-12:17:07.596 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.ClusterProbe - 
+12:17:07.596 [DefaultQuartzScheduler_Worker-1] INFO  ClusterProbe -
 Discovered Cassandra Cluster 'null' details via native driver from host 'jpm-macbook.local' :
 	Host (10.211.56.111) [
 		HostAddress:		10.211.56.111
@@ -182,27 +182,27 @@ Discovered Cassandra Cluster 'null' details via native driver from host 'jpm-mac
 		Cassandra Version:	2.0.10
 		DSE Patch:		71
 	]
-12:17:07.596 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.Prober - Probing Host '10.211.56.111' : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.111, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack1, cassandraVersion=2.0.10]
+12:17:07.596 [DefaultQuartzScheduler_Worker-1] INFO  Prober - Probing Host '10.211.56.111' : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.111, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack1, cassandraVersion=2.0.10]
 12:17:07.597 [DefaultQuartzScheduler_Worker-1] INFO  c.d.probe.actions.IsReachableProbe - Took 0 (ms) to check host is reachable: HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.111, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack1, cassandraVersion=2.0.10]
 12:17:07.602 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Native - Took 3 (ms) to open Socket to host '10.211.56.111' on port '9042 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.111, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack1, cassandraVersion=2.0.10]
 12:17:07.602 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Thrift - Took 0 (ms) to open Socket to host '10.211.56.111' on port '9160 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.111, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack1, cassandraVersion=2.0.10]
 12:17:07.602 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Gossip - Took 0 (ms) to open Socket to host '10.211.56.111' on port '7000 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.111, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack1, cassandraVersion=2.0.10]
-12:17:07.602 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.Prober - Probing Host '10.211.56.110' : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.110, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack1, cassandraVersion=2.0.10]
+12:17:07.602 [DefaultQuartzScheduler_Worker-1] INFO  Prober - Probing Host '10.211.56.110' : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.110, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack1, cassandraVersion=2.0.10]
 12:17:07.603 [DefaultQuartzScheduler_Worker-1] INFO  c.d.probe.actions.IsReachableProbe - Took 0 (ms) to check host is reachable: HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.110, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack1, cassandraVersion=2.0.10]
 12:17:07.603 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Native - Took 0 (ms) to open Socket to host '10.211.56.110' on port '9042 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.110, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack1, cassandraVersion=2.0.10]
 12:17:07.604 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Thrift - Took 0 (ms) to open Socket to host '10.211.56.110' on port '9160 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.110, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack1, cassandraVersion=2.0.10]
 12:17:07.604 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Gossip - Took 0 (ms) to open Socket to host '10.211.56.110' on port '7000 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.110, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack1, cassandraVersion=2.0.10]
-12:17:07.604 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.Prober - Probing Host '10.211.56.113' : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.113, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack3, cassandraVersion=2.0.10]
+12:17:07.604 [DefaultQuartzScheduler_Worker-1] INFO  Prober - Probing Host '10.211.56.113' : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.113, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack3, cassandraVersion=2.0.10]
 12:17:07.605 [DefaultQuartzScheduler_Worker-1] INFO  c.d.probe.actions.IsReachableProbe - Took 0 (ms) to check host is reachable: HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.113, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack3, cassandraVersion=2.0.10]
 12:17:07.605 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Native - Took 0 (ms) to open Socket to host '10.211.56.113' on port '9042 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.113, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack3, cassandraVersion=2.0.10]
 12:17:07.605 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Thrift - Took 0 (ms) to open Socket to host '10.211.56.113' on port '9160 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.113, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack3, cassandraVersion=2.0.10]
 12:17:07.606 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Gossip - Took 0 (ms) to open Socket to host '10.211.56.113' on port '7000 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.113, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC2, rack=rack3, cassandraVersion=2.0.10]
-12:17:07.606 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.Prober - Probing Host '10.211.56.112' : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.112, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack2, cassandraVersion=2.0.10]
+12:17:07.606 [DefaultQuartzScheduler_Worker-1] INFO  Prober - Probing Host '10.211.56.112' : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.112, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack2, cassandraVersion=2.0.10]
 12:17:07.606 [DefaultQuartzScheduler_Worker-1] INFO  c.d.probe.actions.IsReachableProbe - Took 0 (ms) to check host is reachable: HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.112, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack2, cassandraVersion=2.0.10]
 12:17:07.607 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Native - Took 0 (ms) to open Socket to host '10.211.56.112' on port '9042 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.112, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack2, cassandraVersion=2.0.10]
 12:17:07.607 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Thrift - Took 0 (ms) to open Socket to host '10.211.56.112' on port '9160 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.112, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack2, cassandraVersion=2.0.10]
 12:17:07.608 [DefaultQuartzScheduler_Worker-1] INFO  c.datastax.probe.actions.SocketProbe - Gossip - Took 0 (ms) to open Socket to host '10.211.56.112' on port '7000 : HostProbe [fromAddress=jpm-macbook.local, toAddress=10.211.56.112, nativePort=9042, storagePort=7000, rpcPort=9160, dc=DC1, rack=rack2, cassandraVersion=2.0.10]
-12:17:07.608 [DefaultQuartzScheduler_Worker-1] INFO  com.datastax.probe.Prober - Cluster: false
+12:17:07.608 [DefaultQuartzScheduler_Worker-1] INFO  Prober - Cluster: false
 12:17:07.966 [DefaultQuartzScheduler_Worker-1] INFO  c.d.probe.actions.TestCQLQueryProbe - Validating CQL select * from system_auth.users where name = 'cassandra';
 12:17:07.966 [DefaultQuartzScheduler_Worker-1] INFO  c.d.probe.actions.TestCQLQueryProbe - CQL action is select
 12:17:07.966 [DefaultQuartzScheduler_Worker-1] INFO  c.d.probe.actions.TestCQLQueryProbe - About to execute synchronous CQL statement 'select * from system_auth.users where name = 'cassandra';' against Cassandra with consistency 'QUORUM' and query tracing set to true
@@ -247,14 +247,14 @@ activity                                                                        
                                             Message received from /10.211.56.111 | 12:14:04.219 |       /10.211.56.112 |         5545
                                          Processing response from /10.211.56.111 | 12:14:04.220 |       /10.211.56.112 |         5756
 
-12:17:17.109 [DefaultQuartzScheduler_Worker-2] INFO  com.datastax.probe.job.ProbeJob - ProbeJob running...
-12:17:17.109 [DefaultQuartzScheduler_Worker-2] INFO  com.datastax.probe.job.ProbeJob - Instance cassandra-probe.ProbeJob of ProbeJob yamlPath: null, and cqlshrcPath is: null
-12:17:17.109 [DefaultQuartzScheduler_Worker-2] INFO  com.datastax.probe.Prober - No CQLSHRC file provided. Cassandra will be connected to without authentication
-12:17:17.109 [DefaultQuartzScheduler_Worker-2] INFO  com.datastax.probe.Prober - Username and password provided. Cassandra connection will be authenticated
-12:17:17.109 [DefaultQuartzScheduler_Worker-2] INFO  com.datastax.probe.Prober - 
+12:17:17.109 [DefaultQuartzScheduler_Worker-2] INFO  ProbeJob - ProbeJob running...
+12:17:17.109 [DefaultQuartzScheduler_Worker-2] INFO  ProbeJob - Instance cassandra-probe.ProbeJob of ProbeJob yamlPath: null, and cqlshrcPath is: null
+12:17:17.109 [DefaultQuartzScheduler_Worker-2] INFO  Prober - No CQLSHRC file provided. Cassandra will be connected to without authentication
+12:17:17.109 [DefaultQuartzScheduler_Worker-2] INFO  Prober - Username and password provided. Cassandra connection will be authenticated
+12:17:17.109 [DefaultQuartzScheduler_Worker-2] INFO  Prober -
 
 New Probe Commencing....
-12:17:17.110 [DefaultQuartzScheduler_Worker-2] INFO  com.datastax.probe.ClusterProbe - About to discover cluster 'null' details using seed contact points: [10.211.56.111, 10.211.56.112]
+12:17:17.110 [DefaultQuartzScheduler_Worker-2] INFO  ClusterProbe - About to discover cluster 'null' details using seed contact points: [10.211.56.111, 10.211.56.112]
 12:17:17.303 [DefaultQuartzScheduler_Worker-2] INFO  c.d.d.c.p.DCAwareRoundRobinPolicy - Using data-center name 'DC1' for DCAwareRoundRobinPolicy (if this is incorrect, please provide the correct datacenter name with DCAwareRoundRobinPolicy constructor)
 
 ```

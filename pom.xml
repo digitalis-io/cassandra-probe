@@ -132,7 +132,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>com.datastax.probe.App</mainClass>
+							<mainClass>io.digitalis.cassandra,probe.App</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
