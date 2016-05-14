@@ -23,7 +23,7 @@ Getting started
 
 Clone the repo:
 ```
-git clone https://github.com/millerjp/cassandra-probe.git
+git clone https://github.com/digitalis-io/cassandra-probe/cassandra-probe.git
 cd cassandra-probe
 ```
 
@@ -37,9 +37,9 @@ You will now have an executable jar (with all the dependencies included) located
 
 You can also [download](https://github.com/millerjp/cassandra-probe/raw/master/cassandra-probe-exec.jar) a compiled version of the jar if you don't feel like building it yourself.
 ```
-curl -OL https://github.com/millerjp/cassandra-probe/raw/master/cassandra-probe-exec.jar
+curl -OL https://github.com/digitalis-io/cassandra-probe/raw/master/cassandra-probe-exec.jar
 or 
-wget https://github.com/millerjp/cassandra-probe/raw/master/cassandra-probe-exec.jar
+wget https://github.com/digitalis-io/cassandra-probe/raw/master/cassandra-probe-exec.jar
 
 ```
 
@@ -262,6 +262,6 @@ New Probe Commencing....
 Licensing and contributions
 ---------------------------
 
-This code and files are released under the [Apache 2.0 License](https://github.com/millerjp/cassandra-probe/blob/master/LICENSE). Contributions and suggestions are welcome. You can find me on twitter [@CyanMiller](https://twitter.com/CyanMiller).
+This code and files are released under the [Apache 2.0 License](https://github.com/digitalis-io/cassandra-probe/blob/master/LICENSE). Contributions and suggestions are welcome. You can find me on twitter [@CyanMiller](https://twitter.com/CyanMiller).
 
 
