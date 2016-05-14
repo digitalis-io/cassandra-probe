@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.datastax.demo</groupId>
+	<groupId>io.digitalis</groupId>
 	<artifactId>cassandra-probe</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0-SNAPSHOT</version>
@@ -24,10 +24,10 @@
 	</licenses>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jdk.version>1.7</jdk.version>
+		<jdk.version>1.8</jdk.version>
 		<snakeyaml.version>1.13</snakeyaml.version>
 		<testng.version>6.8.8</testng.version>
-		<cassandra-driver.version>2.1.9</cassandra-driver.version>
+		<cassandra-driver.version>3.0.1</cassandra-driver.version>
 		<logback.version>1.0.9</logback.version>
 		<joda-time.version>2.4</joda-time.version>
 		<guava.version>18.0</guava.version>
