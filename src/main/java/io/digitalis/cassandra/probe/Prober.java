@@ -46,6 +46,9 @@ public class Prober {
 	private int nativePort;
 	private int thriftPort;
 	
+	private ClusterProbe cp = null;
+	private TestCQLQueryProbe cqlProbe = null;
+	
 
 	private String[] contactPoints;
 
@@ -157,8 +160,13 @@ public class Prober {
 
 	public void probe() throws FatalProbeException, IOException {
 		LOG.info("\n\nNew Probe Commencing....");
-
-		ClusterProbe cp = new ClusterProbe(this.detectLocalHostname(), this.getYamlPath(), this.user, this.pwd, this.storagePort, this.nativePort, this.thriftPort, this.contactPoints);
+		
+		if (cp == null ) {
+		    LOG.info("Instantiating new ClusterProbe");
+		    cp = new ClusterProbe(this.detectLocalHostname(), this.getYamlPath(), this.user, this.pwd, this.storagePort, this.nativePort, this.thriftPort, this.contactPoints);
+		} else {
+	            LOG.info("Reusing new ClusterProbe");
+		}
 		cp.discoverCluster(true);
 		Set<HostProbe> hosts = cp.getHosts();
 		for (HostProbe h : hosts) {
@@ -222,20 +230,25 @@ public class Prober {
 		}
 
 		if (StringUtils.isNotBlank(this.testCql) && this.consistency != null) {
-			TestCQLQueryProbe cqlProbe = null;
+
 			try {
 				Cluster cluster = cp.getCassandraCluster();
 				LOG.info("Cluster: " + cluster.isClosed());
-
-				cqlProbe = new TestCQLQueryProbe(cluster, this.consistency, null, this.testCql, this.tracingEnabled);
+				if (this.cqlProbe == null) {
+				    LOG.info("Instantiating new TestCQLQueryProbe");
+				    cqlProbe = new TestCQLQueryProbe(cluster, this.consistency, null, this.testCql, this.tracingEnabled);
+				} else {
+                                    LOG.info("Reusing existing TestCQLQueryProbe");
+				}
 				cqlProbe.execute();
 			} finally {
-				if (cqlProbe != null) {
-					cqlProbe.closeSession();
-				}
-				if (cp != null) {
-					cp.shutDownCluster();
-				}
+//				if (cqlProbe != null) {
+//					cqlProbe.closeSession();
+//				}
+//				if (cp != null) {
+//					cp.shutDownCluster();
+//				}
+			    LOG.info("not shutting down session or cluster");
 			}
 		}
 
