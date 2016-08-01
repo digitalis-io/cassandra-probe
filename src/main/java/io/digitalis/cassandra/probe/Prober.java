@@ -45,11 +45,15 @@ public class Prober {
 	private int storagePort;
 	private int nativePort;
 	private int thriftPort;
+	
 
 	private String[] contactPoints;
 
 	public Prober(int storagePort, int nativePort, int thriftPort, String[] contactPoints, String yamlPath, String cqlshrcPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe,
 			boolean pingProbe, String testCql, ConsistencyLevel consistency, boolean tracingEnabled) {
+		
+		LOG.info("Setting up new Prober...");
+		
 		Preconditions.checkArgument(((contactPoints != null && contactPoints.length > 0) || StringUtils.isBlank(yamlPath)), "contact points or yaml path must be provided");
 		this.contactPoints = contactPoints;
 		this.nativeProbe = nativeProbe;
@@ -78,11 +82,15 @@ public class Prober {
 		Preconditions.checkNotNull(userName, "username must be provided");
 		Preconditions.checkNotNull(password, "password must be provided");
 		this.setUserDetails(userName, password);
+		LOG.info("Setting up new Prober...");
+
 	}
 
 	public Prober(int storagePort, int nativePort, int thriftPort, String[] contactPoints, String yamlPath, boolean nativeProbe, boolean thriftProbe, boolean storageProbe, boolean pingProbe,
 			String testCql, ConsistencyLevel consistency, boolean tracingEnabled) {
 		this(storagePort, nativePort, thriftPort, contactPoints, yamlPath, null, nativeProbe, thriftProbe, storageProbe, pingProbe, testCql, consistency, tracingEnabled);
+		LOG.info("Setting up new Prober...");
+
 	}
 
 	public void parseCqlshRcFile() {
