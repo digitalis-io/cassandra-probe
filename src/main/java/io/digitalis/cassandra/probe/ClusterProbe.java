@@ -101,7 +101,7 @@ public class ClusterProbe {
 		try {
 			LOG.info("About to discover cluster '" + this.clusterName + "' details using seed contact points: " + Arrays.toString(this.contactPoints));
 
-			com.datastax.driver.core.Cluster.Builder clusterBulder = com.datastax.driver.core.Cluster.builder().addContactPoints(this.contactPoints).withClusterName(this.clusterName) 
+			com.datastax.driver.core.Cluster.Builder clusterBulder = com.datastax.driver.core.Cluster.builder().addContactPoints(this.contactPoints).withSSL().withClusterName(this.clusterName)
 					.withPort(this.nativePort).withoutJMXReporting().withoutMetrics();
 
 			if (!Strings.isNullOrEmpty(this.user)) {
