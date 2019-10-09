@@ -183,17 +183,17 @@ public class Prober {
 					LOG.info("Native probe disabled");
 				}
 
-				if (this.thriftProbe) {
-					try {
-						ProbeAction rpcPort = new SocketProbe("Thrift", h, h.getRpcPort(), TIMEOUT_MS);
-						rpcPort.execute();
-					} catch (Exception e) {
-						LOG.warn(e.getMessage(), e);
-						LOG.debug(e.getMessage(), e);
-					}
-				} else {
-					LOG.info("Thrift probe disabled");
-				}
+//				if (this.thriftProbe) {
+//					try {
+//						ProbeAction rpcPort = new SocketProbe("Thrift", h, h.getRpcPort(), TIMEOUT_MS);
+//						rpcPort.execute();
+//					} catch (Exception e) {
+//						LOG.warn(e.getMessage(), e);
+//						LOG.debug(e.getMessage(), e);
+//					}
+//				} else {
+//					LOG.info("Thrift probe disabled");
+//				}
 
 				if (this.storageProbe) {
 					try {
